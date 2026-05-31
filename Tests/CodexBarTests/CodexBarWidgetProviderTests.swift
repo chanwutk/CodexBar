@@ -3,28 +3,38 @@ import Testing
 @testable import CodexBarCore
 @testable import CodexBarWidget
 
-@available(macOS 14.0, *)
+// The widget types under test are macOS 14+. Swift Testing's `@Test` macro rejects
+// `@available` on test functions, so each test guards availability in its body instead
+// (no-op on macOS 13, where the WidgetKit extension does not load anyway).
 struct CodexBarWidgetProviderTests {
     @Test
     func `provider choice supports alibaba`() {
+        guard #available(macOS 14.0, *) else { return }
+
         #expect(ProviderChoice(provider: .alibaba) == .alibaba)
         #expect(ProviderChoice.alibaba.provider == .alibaba)
     }
 
     @Test
     func `provider choice supports alibaba token plan`() {
+        guard #available(macOS 14.0, *) else { return }
+
         #expect(ProviderChoice(provider: .alibabatokenplan) == .alibabatokenplan)
         #expect(ProviderChoice.alibabatokenplan.provider == .alibabatokenplan)
     }
 
     @Test
     func `provider choice supports opencode go`() {
+        guard #available(macOS 14.0, *) else { return }
+
         #expect(ProviderChoice(provider: .opencodego) == .opencodego)
         #expect(ProviderChoice.opencodego.provider == .opencodego)
     }
 
     @Test
     func `supported providers fall back to codex when snapshot is empty`() {
+        guard #available(macOS 14.0, *) else { return }
+
         let snapshot = WidgetSnapshot(entries: [], enabledProviders: [], generatedAt: Date())
 
         #expect(CodexBarSwitcherTimelineProvider.supportedProviders(from: snapshot) == [.codex])
@@ -32,6 +42,8 @@ struct CodexBarWidgetProviderTests {
 
     @Test
     func `supported providers keep alibaba when it is the only enabled provider`() {
+        guard #available(macOS 14.0, *) else { return }
+
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         let entry = WidgetSnapshot.ProviderEntry(
             provider: .alibaba,
@@ -50,6 +62,8 @@ struct CodexBarWidgetProviderTests {
 
     @Test
     func `supported providers keep alibaba token plan when it is the only enabled provider`() {
+        guard #available(macOS 14.0, *) else { return }
+
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         let entry = WidgetSnapshot.ProviderEntry(
             provider: .alibabatokenplan,
@@ -68,6 +82,8 @@ struct CodexBarWidgetProviderTests {
 
     @Test
     func `codex weekly only widget rows omit session`() {
+        guard #available(macOS 14.0, *) else { return }
+
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         let entry = WidgetSnapshot.ProviderEntry(
             provider: .codex,
@@ -89,6 +105,8 @@ struct CodexBarWidgetProviderTests {
 
     @Test
     func `codex widget usage rows keep code review separate from rate rows`() {
+        guard #available(macOS 14.0, *) else { return }
+
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         let entry = WidgetSnapshot.ProviderEntry(
             provider: .codex,
@@ -110,6 +128,8 @@ struct CodexBarWidgetProviderTests {
 
     @Test
     func `widget usage rows prefer projected rows over legacy slots`() {
+        guard #available(macOS 14.0, *) else { return }
+
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         let entry = WidgetSnapshot.ProviderEntry(
             provider: .codex,
@@ -132,6 +152,8 @@ struct CodexBarWidgetProviderTests {
 
     @Test
     func `legacy widget usage rows include tertiary slot when supported`() {
+        guard #available(macOS 14.0, *) else { return }
+
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         let entry = WidgetSnapshot.ProviderEntry(
             provider: .antigravity,
@@ -153,6 +175,8 @@ struct CodexBarWidgetProviderTests {
 
     @Test
     func `widget configuration intents default to codex and credits`() {
+        guard #available(macOS 14.0, *) else { return }
+
         let providerIntent = ProviderSelectionIntent()
         let compactIntent = CompactMetricSelectionIntent()
 
