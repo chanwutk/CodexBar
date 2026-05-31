@@ -3,9 +3,9 @@ import Testing
 @testable import CodexBarCore
 @testable import CodexBarWidget
 
-// The widget types under test are macOS 14+. Swift Testing's `@Test` macro rejects
-// `@available` on test functions, so each test guards availability in its body instead
-// (no-op on macOS 13, where the WidgetKit extension does not load anyway).
+/// The widget types under test are macOS 14+. Swift Testing's `@Test` macro rejects
+/// `@available` on test functions, so each test guards availability in its body instead
+/// (no-op on macOS 13, where the WidgetKit extension does not load anyway).
 struct CodexBarWidgetProviderTests {
     @Test
     func `provider choice supports alibaba`() {
