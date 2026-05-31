@@ -397,6 +397,11 @@ The minimum supported OS is **Ventura (13)**, which is also the cask floor (`dep
 - The `Verify Ventura (macOS 13) compatibility` step in `build-app` runs `otool` against both arch slices of
   the app and CLI binaries and fails the release if either's minimum macOS is above 13. This guards against a
   future dependency silently raising the floor.
+- The `Commander` dependency is pinned to **exactly 0.1.0** in `Package.swift` — it is the only release that
+  supports macOS 13. Versions 0.2.0+ require macOS 14, which (because a SwiftPM package has a single platform
+  floor) would force the whole package, including the app, to Sonoma. Do not bump it without first confirming a
+  macOS 13 build, or Ventura support breaks at resolve time. The CLI uses Commander's `Program(descriptors:)`
+  API, which is present in 0.1.0.
 - The Notification Center **widget** targets macOS 14.0 (it uses AppIntents-based WidgetKit:
   `AppIntentConfiguration`, `AppIntentTimelineProvider`, `.containerBackground(for: .widget)`), so it cannot
   drop to 13 without a rewrite. On Ventura the app launches and works normally; macOS simply does not load the

@@ -36,7 +36,10 @@ let package = Package(
     }(),
     dependencies: [
         .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.1"),
-        .package(url: "https://github.com/steipete/Commander", from: "0.2.1"),
+        // Pinned to 0.1.0: it is the only Commander release that supports macOS 13 (Ventura).
+        // 0.2.0+ require macOS 14, which would force the whole package (incl. the app) to Sonoma.
+        // The CLI uses Commander's Program(descriptors:) API, which is present in 0.1.0.
+        .package(url: "https://github.com/steipete/Commander", exact: "0.1.0"),
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.12.0"),
         .package(url: "https://github.com/swiftlang/swift-syntax", from: "600.0.1"),
