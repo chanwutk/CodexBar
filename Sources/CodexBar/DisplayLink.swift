@@ -9,7 +9,7 @@ import QuartzCore
 @MainActor
 @Perceptible
 final class DisplayLinkDriver {
-    // Published counter used to drive SwiftUI updates.
+    /// Published counter used to drive SwiftUI updates.
     var tick: Int = 0
     // Stored as AnyObject because `CADisplayLink` is only available on macOS 14+, while this
     // type must compile for macOS 13. It is only ever assigned on the macOS 15+ path below.

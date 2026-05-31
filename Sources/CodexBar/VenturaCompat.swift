@@ -54,9 +54,9 @@ extension ChartProxy {
     /// `plotFrame` (macOS 14+) with a fallback to the deprecated `plotAreaFrame` on macOS 13.
     var plotFrameCompat: Anchor<CGRect>? {
         if #available(macOS 14.0, *) {
-            return self.plotFrame
+            self.plotFrame
         } else {
-            return self.plotAreaFrame
+            self.plotAreaFrame
         }
     }
 }
