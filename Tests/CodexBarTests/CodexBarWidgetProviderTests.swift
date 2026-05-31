@@ -3,6 +3,7 @@ import Testing
 @testable import CodexBarCore
 @testable import CodexBarWidget
 
+@available(macOS 14.0, *)
 struct CodexBarWidgetProviderTests {
     @Test
     func `provider choice supports alibaba`() {

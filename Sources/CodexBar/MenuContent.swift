@@ -1,39 +1,42 @@
 import AppKit
 import CodexBarCore
+import Perception
 import SwiftUI
 
 @MainActor
 struct MenuContent: View {
-    @Bindable var store: UsageStore
-    @Bindable var settings: SettingsStore
+    @Perception.Bindable var store: UsageStore
+    @Perception.Bindable var settings: SettingsStore
     let account: AccountInfo
     let updater: UpdaterProviding
     let provider: UsageProvider?
     let actions: MenuActions
 
     var body: some View {
-        let descriptor = MenuDescriptor.build(
-            provider: self.provider,
-            store: self.store,
-            settings: self.settings,
-            account: self.account,
-            updateReady: self.updater.updateStatus.isUpdateReady)
+        WithPerceptionTracking {
+            let descriptor = MenuDescriptor.build(
+                provider: self.provider,
+                store: self.store,
+                settings: self.settings,
+                account: self.account,
+                updateReady: self.updater.updateStatus.isUpdateReady)
 
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(Array(descriptor.sections.enumerated()), id: \.offset) { index, section in
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(Array(section.entries.enumerated()), id: \.offset) { _, entry in
-                        self.row(for: entry)
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(descriptor.sections.enumerated()), id: \.offset) { index, section in
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(Array(section.entries.enumerated()), id: \.offset) { _, entry in
+                            self.row(for: entry)
+                        }
+                    }
+                    if index < descriptor.sections.count - 1 {
+                        Divider()
                     }
                 }
-                if index < descriptor.sections.count - 1 {
-                    Divider()
-                }
             }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .frame(minWidth: 260, alignment: .leading)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .frame(minWidth: 260, alignment: .leading)
     }
 
     @ViewBuilder
@@ -164,15 +167,17 @@ struct MenuActions {
 
 @MainActor
 struct StatusIconView: View {
-    @Bindable var store: UsageStore
+    @Perception.Bindable var store: UsageStore
     let provider: UsageProvider
 
     var body: some View {
-        Image(nsImage: self.icon)
-            .renderingMode(.template)
-            .interpolation(.none)
-            .accessibilityLabel(self.accessibilityLabel)
-            .accessibilityValue(self.accessibilityValue)
+        WithPerceptionTracking {
+            Image(nsImage: self.icon)
+                .renderingMode(.template)
+                .interpolation(.none)
+                .accessibilityLabel(self.accessibilityLabel)
+                .accessibilityValue(self.accessibilityValue)
+        }
     }
 
     private var accessibilityLabel: String {

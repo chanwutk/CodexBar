@@ -1,6 +1,6 @@
 import AppKit
 import CodexBarCore
-import Observation
+import Perception
 import ServiceManagement
 
 enum RefreshFrequency: String, CaseIterable, Identifiable {
@@ -109,7 +109,7 @@ enum MultiAccountMenuLayout: String, CaseIterable, Identifiable {
 }
 
 @MainActor
-@Observable
+@Perceptible
 final class SettingsStore {
     static let sharedDefaults = AppGroupSupport.sharedDefaults()
     static let mergedOverviewProviderLimit = 3
@@ -121,12 +121,12 @@ final class SettingsStore {
         return NSClassFromString("XCTestCase") != nil
     }()
 
-    @ObservationIgnored let userDefaults: UserDefaults
-    @ObservationIgnored let configStore: CodexBarConfigStore
-    @ObservationIgnored var config: CodexBarConfig
-    @ObservationIgnored var configPersistTask: Task<Void, Never>?
-    @ObservationIgnored var configLoading = false
-    @ObservationIgnored var tokenAccountsLoaded = false
+    @PerceptionIgnored let userDefaults: UserDefaults
+    @PerceptionIgnored let configStore: CodexBarConfigStore
+    @PerceptionIgnored var config: CodexBarConfig
+    @PerceptionIgnored var configPersistTask: Task<Void, Never>?
+    @PerceptionIgnored var configLoading = false
+    @PerceptionIgnored var tokenAccountsLoaded = false
     var defaultsState: SettingsDefaultsState
     var configRevision: Int = 0
     var providerOrder: [UsageProvider] = []

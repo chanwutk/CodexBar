@@ -2,16 +2,16 @@
 
 > Every AI coding limit, in your menu bar.
 
-[![Latest release](https://img.shields.io/github/v/release/steipete/CodexBar?style=flat-square&color=0a0a0c)](https://github.com/steipete/CodexBar/releases/latest)
-[![macOS 14+](https://img.shields.io/badge/macOS-14%2B-0a0a0c?style=flat-square)](https://github.com/steipete/CodexBar/releases/latest)
-[![Homebrew](https://img.shields.io/badge/brew-steipete%2Ftap%2Fcodexbar-orange?style=flat-square)](https://github.com/steipete/homebrew-tap)
+[![Latest release](https://img.shields.io/github/v/release/chanwutk/CodexBar?style=flat-square&color=0a0a0c)](https://github.com/chanwutk/CodexBar/releases/latest)
+[![macOS 13+](https://img.shields.io/badge/macOS-13%2B-0a0a0c?style=flat-square)](https://github.com/chanwutk/CodexBar/releases/latest)
+[![Homebrew](https://img.shields.io/badge/brew-chanwutk%2Fcodexbar%2Fcodexbar-orange?style=flat-square)](https://github.com/chanwutk/homebrew-codexbar)
 [![AUR](https://img.shields.io/aur/version/codexbar-cli?style=flat-square&color=1793d1)](https://aur.archlinux.org/packages/codexbar-cli)
 [![License: MIT](https://img.shields.io/badge/license-MIT-6e5aff?style=flat-square)](LICENSE)
 [![Site](https://img.shields.io/badge/site-codexbar.app-16d3b4?style=flat-square)](https://codexbar.app)
 
 <a href="https://codexbar.app"><img src="docs/social.png" alt="CodexBar — every AI coding limit in your menu bar. 40+ providers." width="100%" /></a>
 
-Tiny macOS 14+ menu bar app that keeps **AI coding-provider limits visible** and shows when each window resets. Codex, OpenAI, Claude, Cursor, Gemini, Copilot, Grok, GroqCloud, ElevenLabs, Deepgram, z.ai, MiniMax, Kiro, Vertex AI, Augment, OpenRouter, LLM Proxy, Codebuff, Command Code, AWS Bedrock, and many newer coding providers. One status item per provider, or Merge Icons mode with a provider switcher. No Dock icon, minimal UI, dynamic bar icons.
+Tiny macOS 13+ menu bar app that keeps **AI coding-provider limits visible** and shows when each window resets. Codex, OpenAI, Claude, Cursor, Gemini, Copilot, Grok, GroqCloud, ElevenLabs, Deepgram, z.ai, MiniMax, Kiro, Vertex AI, Augment, OpenRouter, LLM Proxy, Codebuff, Command Code, AWS Bedrock, and many newer coding providers. One status item per provider, or Merge Icons mode with a provider switcher. No Dock icon, minimal UI, dynamic bar icons.
 
 <img src="codexbar.png" alt="CodexBar menu popover with provider tiles, usage bars, and reset countdowns" width="520" />
 
@@ -25,20 +25,22 @@ Tiny macOS 14+ menu bar app that keeps **AI coding-provider limits visible** and
 ## Install
 
 ### Requirements
-- macOS 14+ (Sonoma)
+- macOS 13+ (Ventura)
+- WidgetKit widgets remain available on macOS 14+.
 
 ### GitHub Releases
-Download: <https://github.com/steipete/CodexBar/releases>
+Download: <https://github.com/chanwutk/CodexBar/releases>
 
 ### Homebrew
 ```bash
-brew install --cask codexbar
+brew tap chanwutk/codexbar
+brew install --cask chanwutk/codexbar/codexbar
 ```
 
 ### CLI Tarballs (macOS/Linux)
 Homebrew formula (Linux today):
 ```bash
-brew install steipete/tap/codexbar
+brew install chanwutk/codexbar/codexbar
 ```
 Arch Linux AUR package:
 ```bash
@@ -176,6 +178,7 @@ Wondering if CodexBar scans your disk? It doesn’t crawl your filesystem; it re
 - Status polling: [docs/status.md](docs/status.md)
 - Sparkle updates: [docs/sparkle.md](docs/sparkle.md)
 - Packaging: [docs/packaging.md](docs/packaging.md)
+- Homebrew automation: [docs/HOMEBREW_AUTOMATION.md](docs/HOMEBREW_AUTOMATION.md)
 - Development: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 - Release checklist: [docs/RELEASING.md](docs/RELEASING.md)
 - Changelog: [CHANGELOG.md](CHANGELOG.md)
@@ -187,7 +190,8 @@ Wondering if CodexBar scans your disk? It doesn’t crawl your filesystem; it re
 - Optional: set OpenAI cookies (Automatic or Manual) for Codex dashboard extras.
 
 ## Build from source
-Requires macOS 14+ and Swift 6.2+.
+Runtime supports macOS 13+, but building requires Xcode/Swift 6.2+ and a matching macOS SDK. Use GitHub
+Actions or a newer build Mac if your Ventura machine only has the Ventura Command Line Tools.
 
 ```bash
 ./Scripts/package_app.sh        # builds CodexBar.app in-place

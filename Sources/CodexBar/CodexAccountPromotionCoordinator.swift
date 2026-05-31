@@ -1,5 +1,5 @@
 import Foundation
-import Observation
+import Perception
 
 struct CodexSystemAccountPromotionUserFacingError: Error, Equatable {
     let title: String
@@ -7,7 +7,7 @@ struct CodexSystemAccountPromotionUserFacingError: Error, Equatable {
 }
 
 @MainActor
-@Observable
+@Perceptible
 final class CodexAccountPromotionCoordinator {
     let service: CodexAccountPromotionService
     weak var managedAccountCoordinator: ManagedCodexAccountCoordinator?

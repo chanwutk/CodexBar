@@ -1,7 +1,7 @@
 import AppKit
 import CodexBarCore
 import KeyboardShortcuts
-import Observation
+import Perception
 import QuartzCore
 import Security
 import SwiftUI
@@ -146,7 +146,7 @@ final class DisabledUpdaterController: UpdaterProviding {
 }
 
 @MainActor
-@Observable
+@Perceptible
 final class UpdateStatus {
     static let disabled = UpdateStatus()
     var isUpdateReady: Bool
@@ -316,8 +316,10 @@ private func makeUpdaterController() -> UpdaterProviding {
     }
 
     if InstallOrigin.isHomebrewCask(appBundleURL: bundleURL) {
+        let command = Bundle.main.object(forInfoDictionaryKey: "CodexBarHomebrewUpgradeCommand") as? String
+            ?? "brew upgrade --cask chanwutk/codexbar/codexbar"
         return DisabledUpdaterController(
-            unavailableReason: "Updates managed by Homebrew. Run: brew upgrade --cask steipete/tap/codexbar")
+            unavailableReason: "Updates managed by Homebrew. Run: \(command)")
     }
 
     guard isDeveloperIDSigned(bundleURL: bundleURL) else {

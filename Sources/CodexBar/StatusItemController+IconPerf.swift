@@ -1,4 +1,4 @@
-import Observation
+import Perception
 
 struct IconPerfRefreshCycleMetrics {
     var updateIconsCalls = 0
@@ -8,7 +8,7 @@ struct IconPerfRefreshCycleMetrics {
 
 extension StatusItemController {
     func observeIconPerfRefreshCycleChanges() {
-        withObservationTracking {
+        withPerceptionTracking {
             _ = self.store.isRefreshing
             _ = self.settings.debugLogLevel
         } onChange: { [weak self] in

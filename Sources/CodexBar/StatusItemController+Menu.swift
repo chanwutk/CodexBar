@@ -1,6 +1,6 @@
 import AppKit
 import CodexBarCore
-import Observation
+import Perception
 import QuartzCore
 import SwiftUI
 

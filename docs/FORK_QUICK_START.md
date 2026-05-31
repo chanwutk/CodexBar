@@ -8,9 +8,8 @@ read_when:
 
 # CodexBar Fork - Quick Start Guide
 
-**Fork Maintainer:** Brandon Charleson ([topoffunnel.com](https://topoffunnel.com))  
 **Original Author:** Peter Steinberger ([steipete](https://twitter.com/steipete))  
-**Fork Repository:** https://github.com/topoffunnel/CodexBar
+**Fork Repository:** https://github.com/chanwutk/CodexBar
 
 ---
 
@@ -52,7 +51,7 @@ swiftlint --strict
 
 # Restart app after rebuild
 pkill -x CodexBar || pkill -f CodexBar.app || true
-cd /Users/steipete/Projects/codexbar && open -n /Users/steipete/Projects/codexbar/CodexBar.app
+cd /Users/chanwutk/Documents/CodexBar && open -n /Users/chanwutk/Documents/CodexBar/CodexBar.app
 ```
 
 ### Release
@@ -63,6 +62,9 @@ cd /Users/steipete/Projects/codexbar && open -n /Users/steipete/Projects/codexba
 
 # See full release process
 cat docs/RELEASING.md
+
+# See fork install/update options
+cat docs/FORK_INSTALLING.md
 ```
 
 ### Git Workflow
@@ -189,9 +191,9 @@ swiftlint --strict
 4. Read `docs/provider.md` - Provider authoring guide
 
 ### Swift 6 & SwiftUI
-- Uses `@Observable` macro (not `ObservableObject`)
-- Prefer `@State` ownership over `@StateObject`
-- Use `@Bindable` in views for two-way binding
+- Uses Perception's `@Perceptible` macro for macOS 13-compatible Observation-style state.
+- Prefer `@State` ownership over `@StateObject`.
+- Use `@Perception.Bindable` in views for two-way binding.
 - Strict concurrency checking enabled
 
 ### Coding Style
@@ -209,7 +211,7 @@ swiftlint --strict
 1. Fork the fork repository
 2. Create feature branch
 3. Make changes with tests
-4. Submit PR to `topoffunnel/CodexBar`
+4. Submit PR to `chanwutk/CodexBar`
 
 ### To Upstream
 1. Check if feature benefits all users
@@ -224,8 +226,7 @@ See `docs/FORK_ROADMAP.md` for contribution strategy.
 ## 📞 Support
 
 ### Fork-Specific Issues
-- GitHub Issues: https://github.com/topoffunnel/CodexBar/issues
-- Email: [your-email]@topoffunnel.com
+- GitHub Issues: https://github.com/chanwutk/CodexBar/issues
 
 ### Upstream Issues
 - GitHub Issues: https://github.com/steipete/CodexBar/issues

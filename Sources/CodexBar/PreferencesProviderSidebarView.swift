@@ -1,4 +1,5 @@
 import CodexBarCore
+import Perception
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -6,7 +7,7 @@ import UniformTypeIdentifiers
 struct ProviderSidebarListView: View {
     let providers: [UsageProvider]
     let orderedProviders: [UsageProvider]
-    @Bindable var store: UsageStore
+    @Perception.Bindable var store: UsageStore
     let isEnabled: (UsageProvider) -> Binding<Bool>
     let subtitle: (UsageProvider) -> String
     @Binding var searchText: String
@@ -15,57 +16,59 @@ struct ProviderSidebarListView: View {
     @State private var draggingProvider: UsageProvider?
 
     var body: some View {
-        VStack(spacing: 8) {
-            ProviderSidebarSearchField(searchText: self.$searchText)
-                .padding(.horizontal, 8)
-                .padding(.top, 8)
+        WithPerceptionTracking {
+            VStack(spacing: 8) {
+                ProviderSidebarSearchField(searchText: self.$searchText)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 8)
 
-            ScrollView {
-                VStack(spacing: 0) {
-                    if self.providers.isEmpty {
-                        Text(L("No matching providers"))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, minHeight: 80)
-                    }
+                ScrollView {
+                    VStack(spacing: 0) {
+                        if self.providers.isEmpty {
+                            Text(L("No matching providers"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, minHeight: 80)
+                        }
 
-                    ForEach(self.providers, id: \.self) { provider in
-                        ProviderSidebarRowView(
-                            provider: provider,
-                            store: self.store,
-                            isEnabled: self.isEnabled(provider),
-                            subtitle: self.subtitle(provider),
-                            draggingProvider: self.$draggingProvider)
-                            .padding(.horizontal, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                    .fill(
-                                        self.selection == provider
-                                            ? Color(nsColor: .selectedContentBackgroundColor)
-                                            : Color.clear)
-                                    .padding(.horizontal, 4))
-                            .contentShape(Rectangle())
-                            .onTapGesture { self.selection = provider }
-                            .onDrop(
-                                of: [UTType.plainText],
-                                delegate: ProviderSidebarDropDelegate(
-                                    item: provider,
-                                    providers: self.orderedProviders,
-                                    dragging: self.$draggingProvider,
-                                    moveProviders: self.moveProviders))
+                        ForEach(self.providers, id: \.self) { provider in
+                            ProviderSidebarRowView(
+                                provider: provider,
+                                store: self.store,
+                                isEnabled: self.isEnabled(provider),
+                                subtitle: self.subtitle(provider),
+                                draggingProvider: self.$draggingProvider)
+                                .padding(.horizontal, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                        .fill(
+                                            self.selection == provider
+                                                ? Color(nsColor: .selectedContentBackgroundColor)
+                                                : Color.clear)
+                                        .padding(.horizontal, 4))
+                                .contentShape(Rectangle())
+                                .onTapGesture { self.selection = provider }
+                                .onDrop(
+                                    of: [UTType.plainText],
+                                    delegate: ProviderSidebarDropDelegate(
+                                        item: provider,
+                                        providers: self.orderedProviders,
+                                        dragging: self.$draggingProvider,
+                                        moveProviders: self.moveProviders))
+                        }
                     }
+                    .padding(.vertical, 4)
                 }
-                .padding(.vertical, 4)
             }
+            .background(
+                RoundedRectangle(cornerRadius: ProviderSettingsMetrics.sidebarCornerRadius, style: .continuous)
+                    .fill(Color(nsColor: .controlBackgroundColor).opacity(0.8)))
+            .overlay(
+                RoundedRectangle(cornerRadius: ProviderSettingsMetrics.sidebarCornerRadius, style: .continuous)
+                    .stroke(Color(nsColor: .separatorColor).opacity(0.7), lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: ProviderSettingsMetrics.sidebarCornerRadius, style: .continuous))
+            .frame(minWidth: ProviderSettingsMetrics.sidebarWidth, maxWidth: ProviderSettingsMetrics.sidebarWidth)
         }
-        .background(
-            RoundedRectangle(cornerRadius: ProviderSettingsMetrics.sidebarCornerRadius, style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor).opacity(0.8)))
-        .overlay(
-            RoundedRectangle(cornerRadius: ProviderSettingsMetrics.sidebarCornerRadius, style: .continuous)
-                .stroke(Color(nsColor: .separatorColor).opacity(0.7), lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: ProviderSettingsMetrics.sidebarCornerRadius, style: .continuous))
-        .frame(minWidth: ProviderSettingsMetrics.sidebarWidth, maxWidth: ProviderSettingsMetrics.sidebarWidth)
     }
 }
 
@@ -107,61 +110,63 @@ private struct ProviderSidebarSearchField: View {
 @MainActor
 private struct ProviderSidebarRowView: View {
     let provider: UsageProvider
-    @Bindable var store: UsageStore
+    @Perception.Bindable var store: UsageStore
     @Binding var isEnabled: Bool
     let subtitle: String
     @Binding var draggingProvider: UsageProvider?
 
     var body: some View {
-        let isRefreshing = self.store.refreshingProviders.contains(self.provider)
-        let showStatus = self.store.statusChecksEnabled
-        let statusText = self.statusText
+        WithPerceptionTracking {
+            let isRefreshing = self.store.refreshingProviders.contains(self.provider)
+            let showStatus = self.store.statusChecksEnabled
+            let statusText = self.statusText
 
-        HStack(alignment: .center, spacing: 10) {
-            ProviderSidebarReorderHandle()
-                .contentShape(Rectangle())
-                .padding(.vertical, 4)
-                .padding(.horizontal, 2)
-                .help(L("Drag to reorder"))
-                .onDrag {
-                    self.draggingProvider = self.provider
-                    return NSItemProvider(object: self.provider.rawValue as NSString)
-                }
-
-            ProviderSidebarBrandIcon(provider: self.provider)
-
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(self.store.metadata(for: self.provider).displayName)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
-
-                    if showStatus {
-                        ProviderStatusDot(indicator: self.store.statusIndicator(for: self.provider))
+            HStack(alignment: .center, spacing: 10) {
+                ProviderSidebarReorderHandle()
+                    .contentShape(Rectangle())
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 2)
+                    .help(L("Drag to reorder"))
+                    .onDrag {
+                        self.draggingProvider = self.provider
+                        return NSItemProvider(object: self.provider.rawValue as NSString)
                     }
 
-                    if isRefreshing {
-                        ProgressView()
-                            .controlSize(.mini)
+                ProviderSidebarBrandIcon(provider: self.provider)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text(self.store.metadata(for: self.provider).displayName)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+
+                        if showStatus {
+                            ProviderStatusDot(indicator: self.store.statusIndicator(for: self.provider))
+                        }
+
+                        if isRefreshing {
+                            ProgressView()
+                                .controlSize(.mini)
+                        }
                     }
+                    Text(statusText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .frame(height: ProviderSettingsMetrics.sidebarSubtitleHeight, alignment: .topLeading)
                 }
-                Text(statusText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                    .frame(height: ProviderSettingsMetrics.sidebarSubtitleHeight, alignment: .topLeading)
+
+                Spacer(minLength: 8)
+
+                Toggle("", isOn: self.$isEnabled)
+                    .labelsHidden()
+                    .toggleStyle(.checkbox)
+                    .controlSize(.small)
             }
-
-            Spacer(minLength: 8)
-
-            Toggle("", isOn: self.$isEnabled)
-                .labelsHidden()
-                .toggleStyle(.checkbox)
-                .controlSize(.small)
+            .padding(.trailing, 6)
+            .contentShape(Rectangle())
+            .padding(.vertical, 2)
         }
-        .padding(.trailing, 6)
-        .contentShape(Rectangle())
-        .padding(.vertical, 2)
     }
 
     private var statusText: String {

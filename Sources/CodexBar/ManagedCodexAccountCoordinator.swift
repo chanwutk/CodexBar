@@ -1,13 +1,13 @@
 import CodexBarCore
 import Foundation
-import Observation
+import Perception
 
 enum ManagedCodexAccountCoordinatorError: Error, Equatable {
     case authenticationInProgress
 }
 
 @MainActor
-@Observable
+@Perceptible
 final class ManagedCodexAccountCoordinator {
     let service: ManagedCodexAccountService
     private(set) var isAuthenticatingManagedAccount: Bool = false

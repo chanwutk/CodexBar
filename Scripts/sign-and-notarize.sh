@@ -2,11 +2,14 @@
 set -euo pipefail
 
 APP_NAME="CodexBar"
-APP_IDENTITY="Developer ID Application: Peter Steinberger (Y5PE65HELJ)"
 APP_BUNDLE="CodexBar.app"
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 source "$ROOT/version.env"
+if [[ -f "$ROOT/.mac-release.env" ]]; then
+  source "$ROOT/.mac-release.env"
+fi
 source "$ROOT/Scripts/release_artifacts.sh"
+APP_IDENTITY="${APP_IDENTITY:-${MAC_RELEASE_APP_IDENTITY:-Developer ID Application: Peter Steinberger (Y5PE65HELJ)}}"
 
 # Allow building a universal binary if ARCHES is provided; default to universal (arm64 + x86_64).
 ARCHES_VALUE=${ARCHES:-"arm64 x86_64"}

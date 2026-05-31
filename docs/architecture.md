@@ -27,6 +27,6 @@ read_when:
 
 ## Concurrency & platform
 - Swift 6 strict concurrency enabled; prefer Sendable state and explicit MainActor hops.
-- macOS 14+ targeting; avoid deprecated APIs when refactoring.
+- macOS 13+ app targeting; WidgetKit extension code remains macOS 14+.
 
 See also: `docs/providers.md`, `docs/refresh-loop.md`, `docs/ui.md`.

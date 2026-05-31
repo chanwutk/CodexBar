@@ -1,10 +1,11 @@
 import CodexBarCore
+import Perception
 import SwiftUI
 
 @MainActor
 struct ProviderDetailView<SupplementaryContent: View>: View {
     let provider: UsageProvider
-    @Bindable var store: UsageStore
+    @Perception.Bindable var store: UsageStore
     @Binding var isEnabled: Bool
     let subtitle: String
     let model: UsageMenuCardView.Model
@@ -85,75 +86,77 @@ struct ProviderDetailView<SupplementaryContent: View>: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                let labelWidth = self.detailLabelWidth
-                ProviderDetailHeaderView(
-                    provider: self.provider,
-                    store: self.store,
-                    isEnabled: self.$isEnabled,
-                    subtitle: self.subtitle,
-                    model: self.model,
-                    labelWidth: labelWidth,
-                    onRefresh: self.onRefresh)
+        WithPerceptionTracking {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    let labelWidth = self.detailLabelWidth
+                    ProviderDetailHeaderView(
+                        provider: self.provider,
+                        store: self.store,
+                        isEnabled: self.$isEnabled,
+                        subtitle: self.subtitle,
+                        model: self.model,
+                        labelWidth: labelWidth,
+                        onRefresh: self.onRefresh)
 
-                ProviderMetricsInlineView(
-                    provider: self.provider,
-                    model: self.model,
-                    isEnabled: self.isEnabled,
-                    labelWidth: labelWidth)
+                    ProviderMetricsInlineView(
+                        provider: self.provider,
+                        model: self.model,
+                        isEnabled: self.isEnabled,
+                        labelWidth: labelWidth)
 
-                if let errorDisplay {
-                    ProviderErrorView(
-                        title: String(
-                            format: L("last_fetch_failed_with_provider"),
-                            self.store.metadata(for: self.provider).displayName),
-                        display: errorDisplay,
-                        isExpanded: self.$isErrorExpanded,
-                        onCopy: { self.onCopyError(errorDisplay.full) })
-                }
+                    if let errorDisplay {
+                        ProviderErrorView(
+                            title: String(
+                                format: L("last_fetch_failed_with_provider"),
+                                self.store.metadata(for: self.provider).displayName),
+                            display: errorDisplay,
+                            isExpanded: self.$isErrorExpanded,
+                            onCopy: { self.onCopyError(errorDisplay.full) })
+                    }
 
-                if self.hasSettings {
-                    ProviderSettingsSection(title: L("Settings")) {
-                        ForEach(self.settingsPickers) { picker in
-                            ProviderSettingsPickerRowView(picker: picker)
+                    if self.hasSettings {
+                        ProviderSettingsSection(title: L("Settings")) {
+                            ForEach(self.settingsPickers) { picker in
+                                ProviderSettingsPickerRowView(picker: picker)
+                            }
+                            if let tokenAccounts = self.settingsTokenAccounts,
+                               tokenAccounts.isVisible?() ?? true
+                            {
+                                ProviderSettingsTokenAccountsRowView(descriptor: tokenAccounts)
+                            }
+                            ForEach(self.settingsFields) { field in
+                                ProviderSettingsFieldRowView(field: field)
+                            }
+                            ForEach(self.settingsActions) { descriptor in
+                                ProviderSettingsActionsRowView(descriptor: descriptor)
+                            }
+                            if let organizations = self.settingsOrganizations {
+                                ProviderSettingsOrganizationsRowView(descriptor: organizations)
+                            }
                         }
-                        if let tokenAccounts = self.settingsTokenAccounts,
-                           tokenAccounts.isVisible?() ?? true
-                        {
-                            ProviderSettingsTokenAccountsRowView(descriptor: tokenAccounts)
-                        }
-                        ForEach(self.settingsFields) { field in
-                            ProviderSettingsFieldRowView(field: field)
-                        }
-                        ForEach(self.settingsActions) { descriptor in
-                            ProviderSettingsActionsRowView(descriptor: descriptor)
-                        }
-                        if let organizations = self.settingsOrganizations {
-                            ProviderSettingsOrganizationsRowView(descriptor: organizations)
+                    }
+
+                    if self.showsSupplementarySettingsContent {
+                        self.supplementarySettingsContent
+                    }
+
+                    ProviderQuotaWarningSettingsView(provider: self.provider, settings: self.store.settings)
+
+                    if !self.settingsToggles.isEmpty {
+                        ProviderSettingsSection(title: L("Options")) {
+                            ForEach(self.settingsToggles) { toggle in
+                                ProviderSettingsToggleRowView(toggle: toggle)
+                            }
                         }
                     }
                 }
-
-                if self.showsSupplementarySettingsContent {
-                    self.supplementarySettingsContent
-                }
-
-                ProviderQuotaWarningSettingsView(provider: self.provider, settings: self.store.settings)
-
-                if !self.settingsToggles.isEmpty {
-                    ProviderSettingsSection(title: L("Options")) {
-                        ForEach(self.settingsToggles) { toggle in
-                            ProviderSettingsToggleRowView(toggle: toggle)
-                        }
-                    }
-                }
+                .frame(maxWidth: ProviderSettingsMetrics.detailMaxWidth, alignment: .leading)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 8)
             }
-            .frame(maxWidth: ProviderSettingsMetrics.detailMaxWidth, alignment: .leading)
-            .padding(.vertical, 12)
-            .padding(.horizontal, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var hasSettings: Bool {
@@ -207,7 +210,7 @@ struct ProviderDetailView<SupplementaryContent: View>: View {
 @MainActor
 private struct ProviderDetailHeaderView: View {
     let provider: UsageProvider
-    @Bindable var store: UsageStore
+    @Perception.Bindable var store: UsageStore
     @Binding var isEnabled: Bool
     let subtitle: String
     let model: UsageMenuCardView.Model
@@ -215,42 +218,44 @@ private struct ProviderDetailHeaderView: View {
     let onRefresh: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center, spacing: 12) {
-                ProviderDetailBrandIcon(provider: self.provider)
+        WithPerceptionTracking {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .center, spacing: 12) {
+                    ProviderDetailBrandIcon(provider: self.provider)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(self.store.metadata(for: self.provider).displayName)
-                        .font(.title3.weight(.semibold))
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(self.store.metadata(for: self.provider).displayName)
+                            .font(.title3.weight(.semibold))
 
-                    Text(self.detailSubtitle)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
+                        Text(self.detailSubtitle)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
 
-                Spacer(minLength: 12)
+                    Spacer(minLength: 12)
 
-                Button {
-                    self.onRefresh()
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .help(L("Refresh"))
-
-                Toggle("", isOn: self.$isEnabled)
-                    .labelsHidden()
-                    .toggleStyle(.switch)
+                    Button {
+                        self.onRefresh()
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .buttonStyle(.bordered)
                     .controlSize(.small)
-            }
+                    .help(L("Refresh"))
 
-            ProviderDetailInfoGrid(
-                provider: self.provider,
-                store: self.store,
-                isEnabled: self.isEnabled,
-                model: self.model,
-                labelWidth: self.labelWidth)
+                    Toggle("", isOn: self.$isEnabled)
+                        .labelsHidden()
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
+                }
+
+                ProviderDetailInfoGrid(
+                    provider: self.provider,
+                    store: self.store,
+                    isEnabled: self.isEnabled,
+                    model: self.model,
+                    labelWidth: self.labelWidth)
+            }
         }
     }
 
@@ -289,52 +294,54 @@ private struct ProviderDetailBrandIcon: View {
 @MainActor
 private struct ProviderDetailInfoGrid: View {
     let provider: UsageProvider
-    @Bindable var store: UsageStore
+    @Perception.Bindable var store: UsageStore
     let isEnabled: Bool
     let model: UsageMenuCardView.Model
     let labelWidth: CGFloat
 
     var body: some View {
-        let status = self.store.status(for: self.provider)
-        let source = self.store.sourceLabel(for: self.provider)
-        let version = self.store.version(for: self.provider) ?? L("not detected")
-        let updated = self.updatedText
-        let email = self.model.email
-        let enabledText = self.isEnabled ? L("Enabled") : L("Disabled")
+        WithPerceptionTracking {
+            let status = self.store.status(for: self.provider)
+            let source = self.store.sourceLabel(for: self.provider)
+            let version = self.store.version(for: self.provider) ?? L("not detected")
+            let updated = self.updatedText
+            let email = self.model.email
+            let enabledText = self.isEnabled ? L("Enabled") : L("Disabled")
 
-        Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
-            ProviderDetailInfoRow(label: L("State"), value: enabledText, labelWidth: self.labelWidth)
-            ProviderDetailInfoRow(label: L("Source"), value: source, labelWidth: self.labelWidth)
-            ProviderDetailInfoRow(label: L("Version"), value: version, labelWidth: self.labelWidth)
-            ProviderDetailInfoRow(label: L("Updated"), value: updated, labelWidth: self.labelWidth)
+            Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
+                ProviderDetailInfoRow(label: L("State"), value: enabledText, labelWidth: self.labelWidth)
+                ProviderDetailInfoRow(label: L("Source"), value: source, labelWidth: self.labelWidth)
+                ProviderDetailInfoRow(label: L("Version"), value: version, labelWidth: self.labelWidth)
+                ProviderDetailInfoRow(label: L("Updated"), value: updated, labelWidth: self.labelWidth)
 
-            if let status {
-                ProviderDetailInfoRow(
-                    label: L("Status"),
-                    value: status.description ?? status.indicator.label,
-                    labelWidth: self.labelWidth)
+                if let status {
+                    ProviderDetailInfoRow(
+                        label: L("Status"),
+                        value: status.description ?? status.indicator.label,
+                        labelWidth: self.labelWidth)
+                }
+
+                if !email.isEmpty {
+                    ProviderDetailInfoRow(label: L("Account"), value: email, labelWidth: self.labelWidth)
+                }
+
+                if self.provider == .kiro,
+                   let authMethod = self.store.snapshot(for: self.provider)?.loginMethod(for: .kiro),
+                   !authMethod.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                {
+                    ProviderDetailInfoRow(label: L("Auth"), value: authMethod, labelWidth: self.labelWidth)
+                }
+
+                if let planRow = ProviderDetailView<EmptyView>.planRow(
+                    provider: self.provider,
+                    planText: self.model.planText)
+                {
+                    ProviderDetailInfoRow(label: planRow.label, value: planRow.value, labelWidth: self.labelWidth)
+                }
             }
-
-            if !email.isEmpty {
-                ProviderDetailInfoRow(label: L("Account"), value: email, labelWidth: self.labelWidth)
-            }
-
-            if self.provider == .kiro,
-               let authMethod = self.store.snapshot(for: self.provider)?.loginMethod(for: .kiro),
-               !authMethod.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            {
-                ProviderDetailInfoRow(label: L("Auth"), value: authMethod, labelWidth: self.labelWidth)
-            }
-
-            if let planRow = ProviderDetailView<EmptyView>.planRow(
-                provider: self.provider,
-                planText: self.model.planText)
-            {
-                ProviderDetailInfoRow(label: planRow.label, value: planRow.value, labelWidth: self.labelWidth)
-            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
         }
-        .font(.footnote)
-        .foregroundStyle(.secondary)
     }
 
     private var updatedText: String {

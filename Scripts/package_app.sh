@@ -9,6 +9,9 @@ LOWER_CONF=$(printf "%s" "$CONF" | tr '[:upper:]' '[:lower:]')
 
 # Load version info
 source "$ROOT/version.env"
+if [[ -f "$ROOT/.mac-release.env" ]]; then
+  source "$ROOT/.mac-release.env"
+fi
 
 # Clean build only when explicitly requested (slower).
 if [[ "${CODEXBAR_FORCE_CLEAN:-0}" == "1" ]]; then
@@ -123,11 +126,14 @@ if [[ -f "$ICON_SOURCE" ]]; then
   iconutil --convert icns --output "$ICON_TARGET" "$ICON_SOURCE"
 fi
 
-BUNDLE_ID="com.steipete.codexbar"
-FEED_URL="https://raw.githubusercontent.com/steipete/CodexBar/main/appcast.xml"
+RELEASE_REPO="${CODEXBAR_RELEASE_REPO:-${MAC_RELEASE_REPO:-chanwutk/CodexBar}}"
+BUNDLE_ID="${CODEXBAR_BUNDLE_ID:-${MAC_RELEASE_BUNDLE_ID:-com.chanwutk.codexbar}}"
+FEED_URL="${CODEXBAR_FEED_URL:-${MAC_RELEASE_FEED_URL:-https://raw.githubusercontent.com/${RELEASE_REPO}/main/appcast.xml}}"
+SPARKLE_PUBLIC_KEY="${CODEXBAR_SPARKLE_PUBLIC_KEY:-${MAC_RELEASE_SUPUBLIC_ED_KEY:-AGCY8w5vHirVfGGDGc8Szc5iuOqupZSh9pMj/Qs67XI=}}"
+HOMEBREW_UPGRADE_COMMAND="${CODEXBAR_HOMEBREW_UPGRADE_COMMAND:-brew upgrade --cask chanwutk/codexbar/codexbar}"
 AUTO_CHECKS=true
 if [[ "$LOWER_CONF" == "debug" ]]; then
-  BUNDLE_ID="com.steipete.codexbar.debug"
+  BUNDLE_ID="${BUNDLE_ID}.debug"
   FEED_URL=""
   AUTO_CHECKS=false
 fi
@@ -136,11 +142,8 @@ if [[ "$SIGNING_MODE" == "adhoc" ]]; then
   AUTO_CHECKS=false
 fi
 WIDGET_BUNDLE_ID="${BUNDLE_ID}.widget"
-APP_TEAM_ID="${APP_TEAM_ID:-Y5PE65HELJ}"
-APP_GROUP_ID="${APP_TEAM_ID}.com.steipete.codexbar"
-if [[ "$BUNDLE_ID" == *".debug"* ]]; then
-  APP_GROUP_ID="${APP_TEAM_ID}.com.steipete.codexbar.debug"
-fi
+APP_TEAM_ID="${APP_TEAM_ID:-${CODEXBAR_TEAM_ID:-${MAC_RELEASE_TEAM_ID:-Y5PE65HELJ}}}"
+APP_GROUP_ID="${APP_GROUP_ID:-${APP_TEAM_ID}.${BUNDLE_ID}}"
 ENTITLEMENTS_DIR="$ROOT/.build/entitlements"
 APP_ENTITLEMENTS="${ENTITLEMENTS_DIR}/CodexBar.entitlements"
 WIDGET_ENTITLEMENTS="${ENTITLEMENTS_DIR}/CodexBarWidget.entitlements"
@@ -191,13 +194,14 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleShortVersionString</key><string>${MARKETING_VERSION}</string>
     <key>CFBundleVersion</key><string>${BUILD_NUMBER}</string>
-    <key>LSMinimumSystemVersion</key><string>14.0</string>
+    <key>LSMinimumSystemVersion</key><string>13.0</string>
     <key>LSUIElement</key><true/>
     <key>CFBundleIconFile</key><string>Icon</string>
     <key>NSHumanReadableCopyright</key><string>© 2026 Peter Steinberger. MIT License.</string>
     <key>SUFeedURL</key><string>${FEED_URL}</string>
-    <key>SUPublicEDKey</key><string>AGCY8w5vHirVfGGDGc8Szc5iuOqupZSh9pMj/Qs67XI=</string>
+    <key>SUPublicEDKey</key><string>${SPARKLE_PUBLIC_KEY}</string>
     <key>SUEnableAutomaticChecks</key><${AUTO_CHECKS}/>
+    <key>CodexBarHomebrewUpgradeCommand</key><string>${HOMEBREW_UPGRADE_COMMAND}</string>
     <key>CodexBuildTimestamp</key><string>${BUILD_TIMESTAMP}</string>
     <key>CodexGitCommit</key><string>${GIT_COMMIT}</string>
     <key>CodexBarTeamID</key><string>${APP_TEAM_ID}</string>

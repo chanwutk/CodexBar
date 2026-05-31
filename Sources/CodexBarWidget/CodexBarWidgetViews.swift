@@ -2,6 +2,7 @@ import CodexBarCore
 import SwiftUI
 import WidgetKit
 
+@available(macOS 14.0, *)
 struct CodexBarUsageWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: CodexBarWidgetEntry
@@ -44,6 +45,7 @@ struct CodexBarUsageWidgetView: View {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarHistoryWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: CodexBarWidgetEntry
@@ -74,6 +76,7 @@ struct CodexBarHistoryWidgetView: View {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarCompactWidgetView: View {
     let entry: CodexBarCompactEntry
 
@@ -103,6 +106,7 @@ struct CodexBarCompactWidgetView: View {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarSwitcherWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: CodexBarSwitcherEntry
@@ -153,6 +157,7 @@ struct CodexBarSwitcherWidgetView: View {
     }
 }
 
+@available(macOS 14.0, *)
 private struct CompactMetricView: View {
     let entry: WidgetSnapshot.ProviderEntry
     let metric: CompactMetric
@@ -201,6 +206,7 @@ private struct CompactMetricView: View {
     }
 }
 
+@available(macOS 14.0, *)
 private struct ProviderSwitcherRow: View {
     let providers: [UsageProvider]
     let selected: UsageProvider
@@ -226,6 +232,7 @@ private struct ProviderSwitcherRow: View {
     }
 }
 
+@available(macOS 14.0, *)
 private struct ProviderSwitchChip: View {
     let provider: UsageProvider
     let selected: Bool
@@ -315,6 +322,7 @@ private struct ProviderSwitchChip: View {
     }
 }
 
+@available(macOS 14.0, *)
 private struct SwitcherSmallUsageView: View {
     let entry: WidgetSnapshot.ProviderEntry
 
@@ -336,6 +344,7 @@ private struct SwitcherSmallUsageView: View {
     }
 }
 
+@available(macOS 14.0, *)
 private struct SwitcherMediumUsageView: View {
     let entry: WidgetSnapshot.ProviderEntry
 
@@ -362,6 +371,7 @@ private struct SwitcherMediumUsageView: View {
     }
 }
 
+@available(macOS 14.0, *)
 private struct SwitcherLargeUsageView: View {
     let entry: WidgetSnapshot.ProviderEntry
 
@@ -404,6 +414,7 @@ private struct SwitcherLargeUsageView: View {
     }
 }
 
+@available(macOS 14.0, *)
 private struct SmallUsageView: View {
     let entry: WidgetSnapshot.ProviderEntry
 
@@ -427,6 +438,7 @@ private struct SmallUsageView: View {
     }
 }
 
+@available(macOS 14.0, *)
 private struct MediumUsageView: View {
     let entry: WidgetSnapshot.ProviderEntry
 
@@ -455,6 +467,7 @@ private struct MediumUsageView: View {
     }
 }
 
+@available(macOS 14.0, *)
 private struct LargeUsageView: View {
     let entry: WidgetSnapshot.ProviderEntry
 
@@ -532,6 +545,7 @@ struct WidgetUsageRow: Identifiable, Equatable {
     }
 }
 
+@available(macOS 14.0, *)
 private struct HistoryView: View {
     let entry: WidgetSnapshot.ProviderEntry
     let isLarge: Bool

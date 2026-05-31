@@ -1,6 +1,7 @@
 import SwiftUI
 import WidgetKit
 
+@available(macOS 14.0, *)
 @main
 struct CodexBarWidgetBundle: WidgetBundle {
     var body: some Widget {
@@ -11,6 +12,7 @@ struct CodexBarWidgetBundle: WidgetBundle {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarSwitcherWidget: Widget {
     private let kind = "CodexBarSwitcherWidget"
 
@@ -27,6 +29,7 @@ struct CodexBarSwitcherWidget: Widget {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarUsageWidget: Widget {
     private let kind = "CodexBarUsageWidget"
 
@@ -44,6 +47,7 @@ struct CodexBarUsageWidget: Widget {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarHistoryWidget: Widget {
     private let kind = "CodexBarHistoryWidget"
 
@@ -61,6 +65,7 @@ struct CodexBarHistoryWidget: Widget {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarCompactWidget: Widget {
     private let kind = "CodexBarCompactWidget"
 

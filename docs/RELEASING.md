@@ -25,9 +25,10 @@ SwiftPM-only; package/sign/notarize manually (no Xcode project). Sparkle feed is
 
 ## Prereqs
 - Xcode 26+ installed at `/Applications/Xcode.app` (for ictool/iconutil and SDKs).
-- Developer ID Application cert installed: `Developer ID Application: Peter Steinberger (Y5PE65HELJ)`.
+- Developer ID Application cert installed. Set `APP_IDENTITY`/`MAC_RELEASE_APP_IDENTITY` and
+  `APP_TEAM_ID`/`MAC_RELEASE_TEAM_ID` when using a fork-specific certificate.
 - ASC API creds in env: `APP_STORE_CONNECT_API_KEY_P8`, `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`.
-- Sparkle keys: public key expectation is in `.mac-release.env`; CodexBar still uses the older shared AGCY key, so the manifest includes the local Dropbox fallback path. `SPARKLE_PRIVATE_KEY_FILE` overrides it.
+- Sparkle keys: public key expectation is in `.mac-release.env`; set `SPARKLE_PRIVATE_KEY_FILE` when using a fork-specific key.
 - Ensure shell has release env vars loaded (usually `source ~/.profile`) before running `Scripts/release.sh`.
 - Shared release helper: `Scripts/mac-release` resolves `MAC_RELEASE_TOOL`, sibling `../agent-scripts`, or `~/Projects/agent-scripts`.
 
@@ -59,7 +60,7 @@ Gotchas fixed:
 After notarization, or let `Scripts/release.sh` do this:
 ```
 ./Scripts/make_appcast.sh CodexBar-macos-universal-0.1.0.zip \
-  https://raw.githubusercontent.com/steipete/CodexBar/main/appcast.xml
+  https://raw.githubusercontent.com/chanwutk/CodexBar/main/appcast.xml
 ```
 Generates HTML release notes from `CHANGELOG.md` (via `Scripts/changelog-to-html.sh`) and embeds them into the appcast entry.
 Uploads not handled automatically—commit/publish appcast + zip to the feed location (GitHub Releases/raw URL).
@@ -70,7 +71,7 @@ Uploads not handled automatically—commit/publish appcast + zip to the feed loc
 ```
 
 ## Homebrew (Cask)
-CodexBar ships a Homebrew **Cask** in `../homebrew-tap`. When installed via Homebrew, CodexBar disables Sparkle and the app
+CodexBar ships a Homebrew **Cask** in `../homebrew-codexbar`. When installed via Homebrew, CodexBar disables Sparkle and the app
 must be updated via `brew`.
 
 After publishing the GitHub release, `.github/workflows/release-cli.yml` builds the CLI tarballs, uploads `CodexBarCLI-v<version>-{macos-arm64,macos-x86_64,linux-aarch64,linux-x86_64}.tar.gz` plus checksums, then dispatches the Homebrew tap update for both the CLI formula and app cask. If the final dispatch is rate-limited, the tarballs and app zip may still be present; rerun or manually update the tap formula/cask from the published assets.
@@ -84,16 +85,16 @@ After publishing the GitHub release, `.github/workflows/release-cli.yml` builds 
 - [ ] Generate Sparkle appcast via `Scripts/release.sh` or `Scripts/make_appcast.sh`; use `SPARKLE_PRIVATE_KEY_FILE` only if overriding Keychain signing.
   - Upload the dSYM archive alongside the app zip on the GitHub release; the release script now automates this and will fail if it’s missing.
   - After publishing the release and the Release CLI workflow finishes, run `Scripts/check-release-assets.sh <tag>` to confirm the app zip, dSYM zip, CLI tarballs, and CLI checksums are present on GitHub.
-  - Generate the appcast + HTML release notes: `./Scripts/make_appcast.sh CodexBar-macos-universal-<ver>.zip https://raw.githubusercontent.com/steipete/CodexBar/main/appcast.xml`
+  - Generate the appcast + HTML release notes: `./Scripts/make_appcast.sh CodexBar-macos-universal-<ver>.zip https://raw.githubusercontent.com/chanwutk/CodexBar/main/appcast.xml`
   - Beta channel: prefix the command with `SPARKLE_CHANNEL=beta` to tag the entry.
   - Verify the enclosure signature + size: `./Scripts/verify_appcast.sh <ver>`
 - [ ] Upload zip + appcast to feed; publish tag + GitHub release so Sparkle URL is live (avoid 404)
-- [ ] Homebrew tap: wait for the Release CLI workflow to update `../homebrew-tap/Casks/codexbar.rb` (app zip url + sha256) and `../homebrew-tap/Formula/codexbar.rb` (CLI tarball urls + sha256), then verify:
+- [ ] Homebrew tap: wait for the Release CLI workflow to update `../homebrew-codexbar/Casks/codexbar.rb` (app zip url + sha256) and `../homebrew-codexbar/Formula/codexbar.rb` (CLI tarball urls + sha256), then verify:
   - `gh run watch <release-cli-run-id> --exit-status`
   - `Scripts/check-release-assets.sh v<version>`
   - `brew uninstall --cask codexbar || true`
-  - `brew untap steipete/tap || true; brew tap steipete/tap`
-  - `brew install --cask steipete/tap/codexbar && open -a CodexBar`
+  - `brew untap chanwutk/codexbar || true; brew tap chanwutk/codexbar`
+  - `brew install --cask chanwutk/codexbar/codexbar && open -a CodexBar`
 - [ ] Version continuity: confirm the new version is the immediate next patch/minor (no gaps) and CHANGELOG has no skipped numbers (e.g., after 0.2.0 use 0.2.1, not 0.2.2)
 - [ ] Changelog sanity: single top-level title, no duplicate version sections, versions strictly descending with no repeats
 - [ ] Release pages: title format `CodexBar <version>`, notes as Markdown list (no stray blank lines)

@@ -1,5 +1,6 @@
 import AppKit
 import CodexBarCore
+import Perception
 import SwiftUI
 
 enum PreferencesTab: String, CaseIterable, Hashable {
@@ -36,10 +37,10 @@ enum PreferencesTab: String, CaseIterable, Hashable {
 
 @MainActor
 struct PreferencesView: View {
-    @Bindable var settings: SettingsStore
-    @Bindable var store: UsageStore
+    @Perception.Bindable var settings: SettingsStore
+    @Perception.Bindable var store: UsageStore
     let updater: UpdaterProviding
-    @Bindable var selection: PreferencesSelection
+    @Perception.Bindable var selection: PreferencesSelection
     let managedCodexAccountCoordinator: ManagedCodexAccountCoordinator
     let codexAccountPromotionCoordinator: CodexAccountPromotionCoordinator
     let runProviderLoginFlow: @MainActor (UsageProvider) async -> Void
@@ -69,51 +70,53 @@ struct PreferencesView: View {
     }
 
     var body: some View {
-        TabView(selection: self.$selection.tab) {
-            GeneralPane(settings: self.settings, store: self.store)
-                .tabItem { Label(L("tab_general"), systemImage: "gearshape") }
-                .tag(PreferencesTab.general)
+        WithPerceptionTracking {
+            TabView(selection: self.$selection.tab) {
+                GeneralPane(settings: self.settings, store: self.store)
+                    .tabItem { Label(L("tab_general"), systemImage: "gearshape") }
+                    .tag(PreferencesTab.general)
 
-            ProvidersPane(
-                settings: self.settings,
-                store: self.store,
-                managedCodexAccountCoordinator: self.managedCodexAccountCoordinator,
-                codexAccountPromotionCoordinator: self.codexAccountPromotionCoordinator,
-                runProviderLoginFlow: self.runProviderLoginFlow)
-                .tabItem { Label(L("tab_providers"), systemImage: "square.grid.2x2") }
-                .tag(PreferencesTab.providers)
+                ProvidersPane(
+                    settings: self.settings,
+                    store: self.store,
+                    managedCodexAccountCoordinator: self.managedCodexAccountCoordinator,
+                    codexAccountPromotionCoordinator: self.codexAccountPromotionCoordinator,
+                    runProviderLoginFlow: self.runProviderLoginFlow)
+                    .tabItem { Label(L("tab_providers"), systemImage: "square.grid.2x2") }
+                    .tag(PreferencesTab.providers)
 
-            DisplayPane(settings: self.settings, store: self.store)
-                .tabItem { Label(L("tab_display"), systemImage: "eye") }
-                .tag(PreferencesTab.display)
+                DisplayPane(settings: self.settings, store: self.store)
+                    .tabItem { Label(L("tab_display"), systemImage: "eye") }
+                    .tag(PreferencesTab.display)
 
-            AdvancedPane(settings: self.settings)
-                .tabItem { Label(L("tab_advanced"), systemImage: "slider.horizontal.3") }
-                .tag(PreferencesTab.advanced)
+                AdvancedPane(settings: self.settings)
+                    .tabItem { Label(L("tab_advanced"), systemImage: "slider.horizontal.3") }
+                    .tag(PreferencesTab.advanced)
 
-            AboutPane(updater: self.updater)
-                .tabItem { Label(L("tab_about"), systemImage: "info.circle") }
-                .tag(PreferencesTab.about)
+                AboutPane(updater: self.updater)
+                    .tabItem { Label(L("tab_about"), systemImage: "info.circle") }
+                    .tag(PreferencesTab.about)
 
-            if self.settings.debugMenuEnabled {
-                DebugPane(settings: self.settings, store: self.store)
-                    .tabItem { Label(L("tab_debug"), systemImage: "ladybug") }
-                    .tag(PreferencesTab.debug)
+                if self.settings.debugMenuEnabled {
+                    DebugPane(settings: self.settings, store: self.store)
+                        .tabItem { Label(L("tab_debug"), systemImage: "ladybug") }
+                        .tag(PreferencesTab.debug)
+                }
             }
-        }
-        .id(self.settings.appLanguage)
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
-        .frame(width: self.contentWidth, height: self.contentHeight)
-        .onAppear {
-            self.updateLayout(for: self.selection.tab, animate: false)
-            self.ensureValidTabSelection()
-        }
-        .onChange(of: self.selection.tab) { _, newValue in
-            self.updateLayout(for: newValue, animate: true)
-        }
-        .onChange(of: self.settings.debugMenuEnabled) { _, _ in
-            self.ensureValidTabSelection()
+            .id(self.settings.appLanguage)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
+            .frame(width: self.contentWidth, height: self.contentHeight)
+            .onAppear {
+                self.updateLayout(for: self.selection.tab, animate: false)
+                self.ensureValidTabSelection()
+            }
+            .onChange(of: self.selection.tab) { _, newValue in
+                self.updateLayout(for: newValue, animate: true)
+            }
+            .onChange(of: self.settings.debugMenuEnabled) { _, _ in
+                self.ensureValidTabSelection()
+            }
         }
     }
 

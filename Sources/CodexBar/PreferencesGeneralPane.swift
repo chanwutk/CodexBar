@@ -1,5 +1,6 @@
 import AppKit
 import CodexBarCore
+import Perception
 import SwiftUI
 
 enum AppLanguage: String, CaseIterable, Identifiable {
@@ -32,153 +33,155 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
 @MainActor
 struct GeneralPane: View {
-    @Bindable var settings: SettingsStore
-    @Bindable var store: UsageStore
+    @Perception.Bindable var settings: SettingsStore
+    @Perception.Bindable var store: UsageStore
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: true) {
-            VStack(alignment: .leading, spacing: 16) {
-                SettingsSection(contentSpacing: 12) {
-                    Text(L("section_system"))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
+        WithPerceptionTracking {
+            ScrollView(.vertical, showsIndicators: true) {
+                VStack(alignment: .leading, spacing: 16) {
+                    SettingsSection(contentSpacing: 12) {
+                        Text(L("section_system"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(alignment: .top, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(L("language_title"))
+                                        .font(.body)
+                                    Text(L("language_subtitle"))
+                                        .font(.footnote)
+                                        .foregroundStyle(.tertiary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                Spacer()
+                                Picker(L("language_title"), selection: self.$settings.appLanguage) {
+                                    ForEach(AppLanguage.allCases) { option in
+                                        Text(option.label).tag(option.rawValue)
+                                    }
+                                }
+                                .labelsHidden()
+                                .pickerStyle(.menu)
+                                .frame(maxWidth: 200)
+                            }
+                        }
+
+                        PreferenceToggleRow(
+                            title: L("start_at_login_title"),
+                            subtitle: L("start_at_login_subtitle"),
+                            binding: self.$settings.launchAtLogin)
+                    }
+
+                    Divider()
+
+                    SettingsSection(contentSpacing: 12) {
+                        Text(L("section_usage"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
+
+                        VStack(alignment: .leading, spacing: 10) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(L("language_title"))
-                                    .font(.body)
-                                Text(L("language_subtitle"))
+                                Toggle(isOn: self.$settings.costUsageEnabled) {
+                                    Text(L("show_cost_summary"))
+                                        .font(.body)
+                                }
+                                .toggleStyle(.checkbox)
+
+                                Text(L("show_cost_summary_subtitle"))
                                     .font(.footnote)
                                     .foregroundStyle(.tertiary)
                                     .fixedSize(horizontal: false, vertical: true)
-                            }
-                            Spacer()
-                            Picker(L("language_title"), selection: self.$settings.appLanguage) {
-                                ForEach(AppLanguage.allCases) { option in
-                                    Text(option.label).tag(option.rawValue)
-                                }
-                            }
-                            .labelsHidden()
-                            .pickerStyle(.menu)
-                            .frame(maxWidth: 200)
-                        }
-                    }
 
-                    PreferenceToggleRow(
-                        title: L("start_at_login_title"),
-                        subtitle: L("start_at_login_subtitle"),
-                        binding: self.$settings.launchAtLogin)
-                }
+                                if self.settings.costUsageEnabled {
+                                    Stepper(
+                                        value: self.$settings.costUsageHistoryDays,
+                                        in: 1...365,
+                                        step: 1)
+                                    {
+                                        Text(String(
+                                            format: L("cost_history_days_title"),
+                                            self.settings.costUsageHistoryDays))
+                                            .font(.footnote)
+                                    }
 
-                Divider()
-
-                SettingsSection(contentSpacing: 12) {
-                    Text(L("section_usage"))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-
-                    VStack(alignment: .leading, spacing: 10) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Toggle(isOn: self.$settings.costUsageEnabled) {
-                                Text(L("show_cost_summary"))
-                                    .font(.body)
-                            }
-                            .toggleStyle(.checkbox)
-
-                            Text(L("show_cost_summary_subtitle"))
-                                .font(.footnote)
-                                .foregroundStyle(.tertiary)
-                                .fixedSize(horizontal: false, vertical: true)
-
-                            if self.settings.costUsageEnabled {
-                                Stepper(
-                                    value: self.$settings.costUsageHistoryDays,
-                                    in: 1...365,
-                                    step: 1)
-                                {
-                                    Text(String(
-                                        format: L("cost_history_days_title"),
-                                        self.settings.costUsageHistoryDays))
+                                    Text(L("cost_auto_refresh_info"))
                                         .font(.footnote)
+                                        .foregroundStyle(.tertiary)
+
+                                    self.costStatusLine(provider: .claude)
+                                    self.costStatusLine(provider: .codex)
                                 }
-
-                                Text(L("cost_auto_refresh_info"))
-                                    .font(.footnote)
-                                    .foregroundStyle(.tertiary)
-
-                                self.costStatusLine(provider: .claude)
-                                self.costStatusLine(provider: .codex)
                             }
                         }
                     }
-                }
 
-                Divider()
+                    Divider()
 
-                SettingsSection(contentSpacing: 12) {
-                    Text(L("section_automation"))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(alignment: .top, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(L("refresh_cadence_title"))
-                                    .font(.body)
-                                Text(L("refresh_cadence_subtitle"))
-                                    .font(.footnote)
-                                    .foregroundStyle(.tertiary)
+                    SettingsSection(contentSpacing: 12) {
+                        Text(L("section_automation"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(alignment: .top, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(L("refresh_cadence_title"))
+                                        .font(.body)
+                                    Text(L("refresh_cadence_subtitle"))
+                                        .font(.footnote)
+                                        .foregroundStyle(.tertiary)
+                                }
+                                Spacer()
+                                Picker(L("Refresh cadence"), selection: self.$settings.refreshFrequency) {
+                                    ForEach(RefreshFrequency.allCases) { option in
+                                        Text(option.label).tag(option)
+                                    }
+                                }
+                                .labelsHidden()
+                                .pickerStyle(.menu)
+                                .frame(maxWidth: 200)
                             }
+                            if self.settings.refreshFrequency == .manual {
+                                Text(L("manual_refresh_hint"))
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        PreferenceToggleRow(
+                            title: L("check_provider_status_title"),
+                            subtitle: L("check_provider_status_subtitle"),
+                            binding: self.$settings.statusChecksEnabled)
+                        PreferenceToggleRow(
+                            title: L("session_quota_notifications_title"),
+                            subtitle: L("session_quota_notifications_subtitle"),
+                            binding: self.$settings.sessionQuotaNotificationsEnabled)
+                        PreferenceToggleRow(
+                            title: L("quota_warning_notifications_title"),
+                            subtitle: L("quota_warning_notifications_subtitle"),
+                            binding: self.$settings.quotaWarningNotificationsEnabled)
+                        if self.settings.quotaWarningNotificationsEnabled {
+                            GlobalQuotaWarningSettingsView(settings: self.settings)
+                        }
+                    }
+
+                    Divider()
+
+                    SettingsSection(contentSpacing: 12) {
+                        HStack {
                             Spacer()
-                            Picker(L("Refresh cadence"), selection: self.$settings.refreshFrequency) {
-                                ForEach(RefreshFrequency.allCases) { option in
-                                    Text(option.label).tag(option)
-                                }
-                            }
-                            .labelsHidden()
-                            .pickerStyle(.menu)
-                            .frame(maxWidth: 200)
-                        }
-                        if self.settings.refreshFrequency == .manual {
-                            Text(L("manual_refresh_hint"))
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+                            Button(L("quit_app")) { NSApp.terminate(nil) }
+                                .buttonStyle(.borderedProminent)
+                                .controlSize(.large)
                         }
                     }
-                    PreferenceToggleRow(
-                        title: L("check_provider_status_title"),
-                        subtitle: L("check_provider_status_subtitle"),
-                        binding: self.$settings.statusChecksEnabled)
-                    PreferenceToggleRow(
-                        title: L("session_quota_notifications_title"),
-                        subtitle: L("session_quota_notifications_subtitle"),
-                        binding: self.$settings.sessionQuotaNotificationsEnabled)
-                    PreferenceToggleRow(
-                        title: L("quota_warning_notifications_title"),
-                        subtitle: L("quota_warning_notifications_subtitle"),
-                        binding: self.$settings.quotaWarningNotificationsEnabled)
-                    if self.settings.quotaWarningNotificationsEnabled {
-                        GlobalQuotaWarningSettingsView(settings: self.settings)
-                    }
                 }
-
-                Divider()
-
-                SettingsSection(contentSpacing: 12) {
-                    HStack {
-                        Spacer()
-                        Button(L("quit_app")) { NSApp.terminate(nil) }
-                            .buttonStyle(.borderedProminent)
-                            .controlSize(.large)
-                    }
-                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
         }
     }
 

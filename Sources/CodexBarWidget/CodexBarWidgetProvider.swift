@@ -3,6 +3,7 @@ import CodexBarCore
 import SwiftUI
 import WidgetKit
 
+@available(macOS 14.0, *)
 enum ProviderChoice: String, AppEnum {
     case codex
     case claude
@@ -106,6 +107,7 @@ enum ProviderChoice: String, AppEnum {
     }
 }
 
+@available(macOS 14.0, *)
 enum CompactMetric: String, AppEnum {
     case credits
     case todayCost
@@ -120,6 +122,7 @@ enum CompactMetric: String, AppEnum {
     ]
 }
 
+@available(macOS 14.0, *)
 struct ProviderSelectionIntent: AppIntent, WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Provider"
     static let description = IntentDescription("Select the provider to display in the widget.")
@@ -132,6 +135,7 @@ struct ProviderSelectionIntent: AppIntent, WidgetConfigurationIntent {
     }
 }
 
+@available(macOS 14.0, *)
 struct SwitchWidgetProviderIntent: AppIntent {
     static let title: LocalizedStringResource = "Switch Provider"
     static let description = IntentDescription("Switch the provider shown in the widget.")
@@ -152,6 +156,7 @@ struct SwitchWidgetProviderIntent: AppIntent {
     }
 }
 
+@available(macOS 14.0, *)
 struct CompactMetricSelectionIntent: AppIntent, WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Provider + Metric"
     static let description = IntentDescription("Select the provider and metric to display.")
@@ -168,12 +173,14 @@ struct CompactMetricSelectionIntent: AppIntent, WidgetConfigurationIntent {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarWidgetEntry: TimelineEntry {
     let date: Date
     let provider: UsageProvider
     let snapshot: WidgetSnapshot
 }
 
+@available(macOS 14.0, *)
 struct CodexBarCompactEntry: TimelineEntry {
     let date: Date
     let provider: UsageProvider
@@ -181,6 +188,7 @@ struct CodexBarCompactEntry: TimelineEntry {
     let snapshot: WidgetSnapshot
 }
 
+@available(macOS 14.0, *)
 struct CodexBarSwitcherEntry: TimelineEntry {
     let date: Date
     let provider: UsageProvider
@@ -188,6 +196,7 @@ struct CodexBarSwitcherEntry: TimelineEntry {
     let snapshot: WidgetSnapshot
 }
 
+@available(macOS 14.0, *)
 struct CodexBarTimelineProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> CodexBarWidgetEntry {
         CodexBarWidgetEntry(
@@ -216,6 +225,7 @@ struct CodexBarTimelineProvider: AppIntentTimelineProvider {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarSwitcherTimelineProvider: TimelineProvider {
     func placeholder(in context: Context) -> CodexBarSwitcherEntry {
         let snapshot = WidgetPreviewData.snapshot()
@@ -264,6 +274,7 @@ struct CodexBarSwitcherTimelineProvider: TimelineProvider {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarCompactTimelineProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> CodexBarCompactEntry {
         CodexBarCompactEntry(

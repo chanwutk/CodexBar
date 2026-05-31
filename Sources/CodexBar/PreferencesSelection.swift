@@ -1,8 +1,8 @@
 import Foundation
-import Observation
+import Perception
 
 @MainActor
-@Observable
+@Perceptible
 final class PreferencesSelection {
     var tab: PreferencesTab = .general
 }

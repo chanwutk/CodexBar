@@ -8,7 +8,16 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 PREV_VER=${PREV_TAG#v}
 APP_NAME="CodexBar"
 
-ZIP_URL="https://github.com/steipete/CodexBar/releases/download/${PREV_TAG}/${APP_NAME}-${PREV_VER}.zip"
+if [[ -f "$ROOT/.mac-release.env" ]]; then
+  # shellcheck disable=SC1091
+  source "$ROOT/.mac-release.env"
+fi
+# shellcheck disable=SC1091
+source "$ROOT/Scripts/release_artifacts.sh"
+
+RELEASE_REPO=${MAC_RELEASE_REPO:-chanwutk/CodexBar}
+ZIP_NAME=$(codexbar_app_zip_name "$PREV_VER" "${ARCHES:-arm64 x86_64}")
+ZIP_URL="https://github.com/${RELEASE_REPO}/releases/download/${PREV_TAG}/${ZIP_NAME}"
 TMP_DIR=$(mktemp -d /tmp/codexbar-live.XXXX)
 trap 'rm -rf "$TMP_DIR"' EXIT
 

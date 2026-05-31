@@ -17,7 +17,7 @@ Use it when you need usage numbers in scripts, CI, or dashboards without UI.
 - Manual: `ln -sf "/Applications/CodexBar.app/Contents/Helpers/CodexBarCLI" /usr/local/bin/codexbar`.
 
 ### Release tarball install (macOS/Linux)
-- Homebrew formula (Linux today): `brew install steipete/tap/codexbar`.
+- Homebrew formula (Linux today): `brew install chanwutk/codexbar/codexbar`.
 - Download release tarballs from GitHub Releases:
   - macOS: `CodexBarCLI-v<tag>-macos-arm64.tar.gz`, `CodexBarCLI-v<tag>-macos-x86_64.tar.gz`
   - Linux: `CodexBarCLI-v<tag>-linux-aarch64.tar.gz`, `CodexBarCLI-v<tag>-linux-x86_64.tar.gz`

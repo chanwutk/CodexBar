@@ -10,7 +10,8 @@ import WebKit
 ///
 /// Implementation detail: macOS 14+ supports `WKWebsiteDataStore.dataStore(forIdentifier:)`, which creates
 /// persistent isolated stores keyed by an identifier. We derive a stable UUID from the email so the same
-/// account always maps to the same cookie store.
+/// account always maps to the same cookie store. macOS 13 falls back to WebKit's default persistent store
+/// because isolated persistent website data stores are not available there.
 ///
 /// Important: We cache the `WKWebsiteDataStore` instances so the same object is returned for the same
 /// account email. This ensures `OpenAIDashboardWebViewCache` can use object identity for cache lookups.
@@ -22,6 +23,7 @@ public enum OpenAIDashboardWebsiteDataStore {
 
     public static func store(forAccountEmail email: String?) -> WKWebsiteDataStore {
         guard let normalized = normalizeEmail(email) else { return .default() }
+        guard #available(macOS 14.0, *) else { return .default() }
 
         // Return cached instance if available to maintain stable object identity
         if let cached = cachedStores[normalized] {

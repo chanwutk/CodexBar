@@ -1,6 +1,6 @@
 import CodexBarCore
 import Foundation
-import Observation
+import Perception
 import Testing
 @testable import CodexBar
 
@@ -1022,7 +1022,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
+        withPerceptionTracking {
             _ = store.menuObservationToken
         } onChange: {
             didChange.set()
@@ -1052,7 +1052,7 @@ struct SettingsStoreTests {
             thresholds: [Int]) async
         {
             let didChange = ObservationFlag()
-            withObservationTracking {
+            withPerceptionTracking {
                 _ = store.menuObservationToken
             } onChange: {
                 didChange.set()
@@ -1083,7 +1083,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
+        withPerceptionTracking {
             _ = store.menuObservationToken
         } onChange: {
             didChange.set()
@@ -1110,7 +1110,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
+        withPerceptionTracking {
             _ = store.codexCookieSource
         } onChange: {
             didChange.set()
@@ -1137,7 +1137,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
+        withPerceptionTracking {
             _ = store.menuObservationToken
         } onChange: {
             didChange.set()

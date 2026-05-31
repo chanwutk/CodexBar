@@ -13,6 +13,10 @@ on:
 permissions:
   contents: write
 
+env:
+  HOMEBREW_TAP_REPO: chanwutk/homebrew-codexbar
+  RELEASE_REPOSITORY: chanwutk/CodexBar
+
 jobs:
   build-cli:
     strategy:
@@ -245,9 +249,115 @@ jobs:
             ${{ steps.pkg.outputs.out_dir }}/${{ steps.pkg.outputs.asset }}
             ${{ steps.pkg.outputs.out_dir }}/${{ steps.pkg.outputs.asset }}.sha256
 
+  build-app:
+    runs-on: macos-15
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Select Xcode 26.1.1 (if present) or fallback to default
+        run: |
+          set -euo pipefail
+          for candidate in /Applications/Xcode_26.1.1.app /Applications/Xcode_26.1.app /Applications/Xcode.app; do
+            if [[ -d "$candidate" ]]; then
+              sudo xcode-select -s "${candidate}/Contents/Developer"
+              echo "DEVELOPER_DIR=${candidate}/Contents/Developer" >> "$GITHUB_ENV"
+              break
+            fi
+          done
+          /usr/bin/xcodebuild -version
+
+      - name: Validate release tag
+        if: github.event_name == 'release' || inputs.tag != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$RELEASE_TAG" ]]; then
+            echo "Missing release tag." >&2
+            exit 1
+          fi
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9A-Za-z._-]+$ ]]; then
+            echo "Invalid release tag: $RELEASE_TAG" >&2
+            exit 1
+          fi
+
+      - name: Build ad-hoc signed universal app
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          source version.env
+          version="$MARKETING_VERSION"
+          # On a real release tag, the tag version must match version.env.
+          if [[ "$RELEASE_TAG" =~ ^v[0-9] ]]; then
+            tag_version="${RELEASE_TAG#v}"
+            if [[ "$tag_version" != "$MARKETING_VERSION" ]]; then
+              echo "Release tag ($tag_version) does not match version.env MARKETING_VERSION ($MARKETING_VERSION)." >&2
+              echo "Bump version.env before tagging." >&2
+              exit 1
+            fi
+          fi
+
+          # Ad-hoc signing: no Apple Developer ID, no notarization, Sparkle feed disabled.
+          # Homebrew `brew upgrade` is the update path for $0 deployments.
+          CODEXBAR_SIGNING=adhoc ARCHES="arm64 x86_64" ./Scripts/package_app.sh release
+
+          xattr -cr CodexBar.app
+          find CodexBar.app -name '._*' -delete
+          zip_name="CodexBar-macos-universal-${version}.zip"
+          /usr/bin/ditto --norsrc -c -k --keepParent CodexBar.app "$zip_name"
+          shasum -a 256 "$zip_name" > "$zip_name.sha256"
+          echo "zip_name=$zip_name" >> "$GITHUB_OUTPUT"
+
+      - name: Verify Ventura (macOS 13) compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The main app and bundled CLI must run on macOS Ventura (13). The Notification
+          # Center widget legitimately targets 14.0 (AppIntents WidgetKit) and is excluded.
+          check_minos() {
+            local bin="$1"
+            for arch in arm64 x86_64; do
+              local minos
+              minos="$(otool -arch "$arch" -l "$bin" \
+                | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; exit}')"
+              if [[ -z "$minos" ]]; then
+                echo "Could not read minos for $arch of $bin." >&2
+                exit 1
+              fi
+              echo "$bin [$arch] minos=$minos"
+              if [[ "${minos%%.*}" -gt 13 ]]; then
+                echo "::error::$bin ($arch) minimum macOS is $minos (> 13); it would not run on Ventura." >&2
+                exit 1
+              fi
+            done
+          }
+          check_minos CodexBar.app/Contents/MacOS/CodexBar
+          check_minos CodexBar.app/Contents/Helpers/CodexBarCLI
+
+      - name: Upload release asset
+        if: github.event_name == 'release'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP="${{ steps.build.outputs.zip_name }}"
+          gh release upload "$RELEASE_TAG" "$ZIP" "$ZIP.sha256" --clobber
+
+      - name: Upload workflow artifact (manual runs)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v6
+        with:
+          name: codexbar-app-universal
+          path: |
+            ${{ steps.build.outputs.zip_name }}
+            ${{ steps.build.outputs.zip_name }}.sha256
+
   update-homebrew-tap:
     runs-on: ubuntu-latest
-    needs: build-cli
+    needs: [build-cli, build-app]
     if: github.event_name == 'release'
     steps:
       - name: Resolve release tag
@@ -280,10 +390,10 @@ jobs:
           test -n "$GH_TOKEN"
           for attempt in {1..6}; do
             if gh workflow run update-formula.yml \
-              --repo steipete/homebrew-tap \
+              --repo "$HOMEBREW_TAP_REPO" \
               -f formula=codexbar \
               -f tag="$RELEASE_TAG" \
-              -f repository=steipete/CodexBar \
+              -f repository="$RELEASE_REPOSITORY" \
               -f artifact_template='CodexBarCLI-{tag}-{target}.tar.gz' \
               -f target_aliases='darwin_arm64=macos-arm64,darwin_amd64=macos-x86_64,linux_arm64=linux-aarch64,linux_amd64=linux-x86_64' \
               -f cask=codexbar \
@@ -308,14 +418,14 @@ jobs:
           for _ in {1..20}; do
             run_id="$(
               gh run list \
-                --repo steipete/homebrew-tap \
+                --repo "$HOMEBREW_TAP_REPO" \
                 --workflow update-formula.yml \
                 --json databaseId,displayTitle \
                 --jq '.[] | select(.displayTitle | contains(env.REQUEST_ID)) | .databaseId' 2>/tmp/codexbar-tap-run-list.err \
                 | head -n1 || true
             )"
             if [[ -n "$run_id" ]]; then
-              gh run watch "$run_id" --repo steipete/homebrew-tap --exit-status
+              gh run watch "$run_id" --repo "$HOMEBREW_TAP_REPO" --exit-status
               exit 0
             fi
             cat /tmp/codexbar-tap-run-list.err >&2 || true

@@ -1,42 +1,45 @@
 import CodexBarCore
+import Perception
 import SwiftUI
 
 @MainActor
 struct GlobalQuotaWarningSettingsView: View {
-    @Bindable var settings: SettingsStore
+    @Perception.Bindable var settings: SettingsStore
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 16) {
-                Toggle(isOn: Binding(
-                    get: { self.settings.quotaWarningWindowEnabled(.session) },
-                    set: { self.settings.setQuotaWarningWindowEnabled(.session, enabled: $0) }))
-                {
-                    Text(L("quota_warning_session_capitalized"))
-                        .font(.footnote)
-                }
-                .toggleStyle(.checkbox)
+        WithPerceptionTracking {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 16) {
+                    Toggle(isOn: Binding(
+                        get: { self.settings.quotaWarningWindowEnabled(.session) },
+                        set: { self.settings.setQuotaWarningWindowEnabled(.session, enabled: $0) }))
+                    {
+                        Text(L("quota_warning_session_capitalized"))
+                            .font(.footnote)
+                    }
+                    .toggleStyle(.checkbox)
 
-                Toggle(isOn: Binding(
-                    get: { self.settings.quotaWarningWindowEnabled(.weekly) },
-                    set: { self.settings.setQuotaWarningWindowEnabled(.weekly, enabled: $0) }))
-                {
-                    Text(L("quota_warning_weekly_capitalized"))
+                    Toggle(isOn: Binding(
+                        get: { self.settings.quotaWarningWindowEnabled(.weekly) },
+                        set: { self.settings.setQuotaWarningWindowEnabled(.weekly, enabled: $0) }))
+                    {
+                        Text(L("quota_warning_weekly_capitalized"))
+                            .font(.footnote)
+                    }
+                    .toggleStyle(.checkbox)
+                }
+
+                self.windowThresholdField(.session)
+                self.windowThresholdField(.weekly)
+
+                Toggle(isOn: self.$settings.quotaWarningSoundEnabled) {
+                    Text(L("quota_warning_sound"))
                         .font(.footnote)
                 }
                 .toggleStyle(.checkbox)
             }
-
-            self.windowThresholdField(.session)
-            self.windowThresholdField(.weekly)
-
-            Toggle(isOn: self.$settings.quotaWarningSoundEnabled) {
-                Text(L("quota_warning_sound"))
-                    .font(.footnote)
-            }
-            .toggleStyle(.checkbox)
+            .padding(.leading, 20)
         }
-        .padding(.leading, 20)
     }
 
     private func windowThresholdField(_ window: QuotaWarningWindow) -> some View {
@@ -53,17 +56,19 @@ struct GlobalQuotaWarningSettingsView: View {
 @MainActor
 struct ProviderQuotaWarningSettingsView: View {
     let provider: UsageProvider
-    @Bindable var settings: SettingsStore
+    @Perception.Bindable var settings: SettingsStore
 
     var body: some View {
-        ProviderSettingsSection(title: L("quota_warnings_title")) {
-            Text(L("quota_warning_provider_inherits"))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+        WithPerceptionTracking {
+            ProviderSettingsSection(title: L("quota_warnings_title")) {
+                Text(L("quota_warning_provider_inherits"))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
 
-            self.windowRow(.session)
-            self.windowRow(.weekly)
+                self.windowRow(.session)
+                self.windowRow(.weekly)
+            }
         }
     }
 

@@ -31,9 +31,12 @@ struct OpenAIDashboardWebViewCacheTests {
         #expect(store1 === store2, "Same email should return same instance")
         #expect(store1 === store3, "Email comparison should be case-insensitive")
 
-        // Different email should return different instance
         let store4 = OpenAIDashboardWebsiteDataStore.store(forAccountEmail: "other@example.com")
-        #expect(store1 !== store4, "Different emails should return different instances")
+        if #available(macOS 14.0, *) {
+            #expect(store1 !== store4, "Different emails should return different instances")
+        } else {
+            #expect(store1 === store4, "macOS 13 falls back to the shared default persistent store")
+        }
 
         OpenAIDashboardWebsiteDataStore.clearCacheForTesting()
     }
