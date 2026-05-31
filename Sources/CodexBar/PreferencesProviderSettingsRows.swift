@@ -79,7 +79,7 @@ struct ProviderSettingsToggleRowView: View {
                 }
             }
         }
-        .onChange(of: self.toggle.binding.wrappedValue) { _, enabled in
+        .onChangeCompat(of: self.toggle.binding.wrappedValue) { _, enabled in
             guard let onChange = self.toggle.onChange else { return }
             Task { @MainActor in
                 await onChange(enabled)
@@ -135,7 +135,7 @@ struct ProviderSettingsPickerRowView: View {
             }
         }
         .disabled(!isEnabled)
-        .onChange(of: self.picker.binding.wrappedValue) { _, selection in
+        .onChangeCompat(of: self.picker.binding.wrappedValue) { _, selection in
             guard let onChange = self.picker.onChange else { return }
             Task { @MainActor in
                 await onChange(selection)

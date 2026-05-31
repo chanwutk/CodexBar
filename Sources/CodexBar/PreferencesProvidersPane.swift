@@ -125,10 +125,10 @@ struct ProvidersPane: View {
             .onAppear {
                 self.ensureSelection()
             }
-            .onChange(of: self.providers) { _, _ in
+            .onChangeCompat(of: self.providers) { _, _ in
                 self.ensureSelection()
             }
-            .onChange(of: self.providerSearchText) { _, _ in
+            .onChangeCompat(of: self.providerSearchText) { _, _ in
                 self.ensureSelection()
             }
             .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in

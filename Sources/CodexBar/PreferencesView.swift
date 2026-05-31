@@ -111,10 +111,10 @@ struct PreferencesView: View {
                 self.updateLayout(for: self.selection.tab, animate: false)
                 self.ensureValidTabSelection()
             }
-            .onChange(of: self.selection.tab) { _, newValue in
+            .onChangeCompat(of: self.selection.tab) { _, newValue in
                 self.updateLayout(for: newValue, animate: true)
             }
-            .onChange(of: self.settings.debugMenuEnabled) { _, _ in
+            .onChangeCompat(of: self.settings.debugMenuEnabled) { _, _ in
                 self.ensureValidTabSelection()
             }
         }

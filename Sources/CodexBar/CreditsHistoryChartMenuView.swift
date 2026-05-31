@@ -221,7 +221,7 @@ struct CreditsHistoryChartMenuView: View {
 
     private func selectionBandRect(model: Model, proxy: ChartProxy, geo: GeometryProxy) -> CGRect? {
         guard let key = self.selectedDayKey else { return nil }
-        guard let plotAnchor = proxy.plotFrame else { return nil }
+        guard let plotAnchor = proxy.plotFrameCompat else { return nil }
         let plotFrame = geo[plotAnchor]
         guard let index = model.dayDates.firstIndex(where: { $0.dayKey == key }) else { return nil }
         let date = model.dayDates[index].date
@@ -275,7 +275,7 @@ struct CreditsHistoryChartMenuView: View {
             return
         }
 
-        guard let plotAnchor = proxy.plotFrame else { return }
+        guard let plotAnchor = proxy.plotFrameCompat else { return }
         let plotFrame = geo[plotAnchor]
         guard plotFrame.contains(location) else { return }
 

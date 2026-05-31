@@ -227,12 +227,22 @@ private struct ScreenConfettiOverlayView: View {
         let normalizedX = size.width > 0 ? canvasOrigin.x / size.width : 1
         let normalizedY = size.height > 0 ? canvasOrigin.y / size.height : 0
         let resolvedColors = self.colors.map { color -> VortexSystem.Color in
-            let components = color.resolve(in: self.environment)
-            return VortexSystem.Color(
-                red: Double(components.red),
-                green: Double(components.green),
-                blue: Double(components.blue),
-                opacity: Double(components.opacity))
+            if #available(macOS 14.0, *) {
+                let components = color.resolve(in: self.environment)
+                return VortexSystem.Color(
+                    red: Double(components.red),
+                    green: Double(components.green),
+                    blue: Double(components.blue),
+                    opacity: Double(components.opacity))
+            } else {
+                // `Color.resolve(in:)` is macOS 14+. On macOS 13 convert via NSColor in sRGB.
+                let nsColor = NSColor(color).usingColorSpace(.sRGB)
+                return VortexSystem.Color(
+                    red: Double(nsColor?.redComponent ?? 1),
+                    green: Double(nsColor?.greenComponent ?? 1),
+                    blue: Double(nsColor?.blueComponent ?? 1),
+                    opacity: Double(nsColor?.alphaComponent ?? 1))
+            }
         }
 
         let explosion = VortexSystem(

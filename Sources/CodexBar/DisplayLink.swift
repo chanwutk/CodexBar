@@ -11,7 +11,9 @@ import QuartzCore
 final class DisplayLinkDriver {
     // Published counter used to drive SwiftUI updates.
     var tick: Int = 0
-    private var displayLink: CADisplayLink?
+    // Stored as AnyObject because `CADisplayLink` is only available on macOS 14+, while this
+    // type must compile for macOS 13. It is only ever assigned on the macOS 15+ path below.
+    private var displayLink: AnyObject?
     private var cvDisplayLink: CVDisplayLink?
     private var targetInterval: CFTimeInterval = 1.0 / 60.0
     private var lastTickTimestamp: CFTimeInterval = 0
@@ -42,7 +44,9 @@ final class DisplayLinkDriver {
     }
 
     func stop() {
-        self.displayLink?.invalidate()
+        if #available(macOS 14.0, *) {
+            (self.displayLink as? CADisplayLink)?.invalidate()
+        }
         self.displayLink = nil
         if let cvDisplayLink = self.cvDisplayLink {
             CVDisplayLinkStop(cvDisplayLink)

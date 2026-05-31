@@ -1,14 +1,13 @@
+import AppKit
 import SwiftUI
 
 struct HiddenWindowView: View {
-    @Environment(\.openSettings) private var openSettings
-
     var body: some View {
         Color.clear
             .frame(width: 20, height: 20)
             .onReceive(NotificationCenter.default.publisher(for: .codexbarOpenSettings)) { _ in
                 Task { @MainActor in
-                    self.openSettings()
+                    Self.openSettingsWindow()
                 }
             }
             .task {
@@ -34,5 +33,16 @@ struct HiddenWindowView: View {
                     window.setFrameOrigin(NSPoint(x: -5000, y: -5000))
                 }
             }
+    }
+
+    /// Opens the Settings window via AppKit. SwiftUI's `openSettings` environment action is
+    /// macOS 14+ only and usable solely inside a View, so we use the responder-chain selector,
+    /// which works on macOS 13 (`showSettingsWindow:`) and falls back for older naming.
+    @MainActor
+    private static func openSettingsWindow() {
+        NSApp.activate(ignoringOtherApps: true)
+        if !NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil) {
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
     }
 }

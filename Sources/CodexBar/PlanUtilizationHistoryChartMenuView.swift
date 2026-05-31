@@ -771,7 +771,7 @@ struct PlanUtilizationHistoryChartMenuView: View {
             return
         }
 
-        guard let plotAnchor = proxy.plotFrame else { return }
+        guard let plotAnchor = proxy.plotFrameCompat else { return }
         let plotFrame = geo[plotAnchor]
         guard plotFrame.contains(location) else {
             if self.selectedPointID != nil { self.selectedPointID = nil }

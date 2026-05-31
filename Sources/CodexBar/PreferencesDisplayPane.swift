@@ -141,14 +141,14 @@ struct DisplayPane: View {
                 .onAppear {
                     self.reconcileOverviewSelection()
                 }
-                .onChange(of: self.settings.mergeIcons) { _, isEnabled in
+                .onChangeCompat(of: self.settings.mergeIcons) { _, isEnabled in
                     guard isEnabled else {
                         self.isOverviewProviderPopoverPresented = false
                         return
                     }
                     self.reconcileOverviewSelection()
                 }
-                .onChange(of: self.activeProvidersInOrder) { _, _ in
+                .onChangeCompat(of: self.activeProvidersInOrder) { _, _ in
                     if self.activeProvidersInOrder.isEmpty {
                         self.isOverviewProviderPopoverPresented = false
                     }

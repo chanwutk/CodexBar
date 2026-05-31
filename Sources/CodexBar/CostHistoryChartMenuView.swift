@@ -359,7 +359,7 @@ struct CostHistoryChartMenuView: View {
 
     private func selectionBandRect(model: Model, proxy: ChartProxy, geo: GeometryProxy) -> CGRect? {
         guard let key = self.selectedDateKey else { return nil }
-        guard let plotAnchor = proxy.plotFrame else { return nil }
+        guard let plotAnchor = proxy.plotFrameCompat else { return nil }
         let plotFrame = geo[plotAnchor]
         guard let index = model.dateKeys.firstIndex(where: { $0.key == key }) else { return nil }
         let date = model.dateKeys[index].date
@@ -405,7 +405,7 @@ struct CostHistoryChartMenuView: View {
             return
         }
 
-        guard let plotAnchor = proxy.plotFrame else { return }
+        guard let plotAnchor = proxy.plotFrameCompat else { return }
         let plotFrame = geo[plotAnchor]
         guard plotFrame.contains(location) else { return }
 

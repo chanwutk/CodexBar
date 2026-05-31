@@ -34,7 +34,7 @@ struct DebugPane: View {
                             title: L("enable_file_logging"),
                             subtitle: String(format: L("enable_file_logging_subtitle"), self.fileLogPath),
                             binding: self.$debugFileLoggingEnabled)
-                            .onChange(of: self.debugFileLoggingEnabled) { _, newValue in
+                            .onChangeCompat(of: self.debugFileLoggingEnabled) { _, newValue in
                                 if self.settings.debugFileLoggingEnabled != newValue {
                                     self.settings.debugFileLoggingEnabled = newValue
                                 }

@@ -192,7 +192,7 @@ private struct QuotaWarningThresholdField: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.footnote)
                     .frame(width: 56)
-                    .onChange(of: self.upperText) { _, value in
+                    .onChangeCompat(of: self.upperText) { _, value in
                         self.upperText = Self.filteredIntegerText(value)
                     }
                     .onSubmit { self.commit() }
@@ -205,7 +205,7 @@ private struct QuotaWarningThresholdField: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.footnote)
                     .frame(width: 56)
-                    .onChange(of: self.lowerText) { _, value in
+                    .onChangeCompat(of: self.lowerText) { _, value in
                         self.lowerText = Self.filteredIntegerText(value)
                     }
                     .onSubmit { self.commit() }
@@ -222,7 +222,7 @@ private struct QuotaWarningThresholdField: View {
             }
         }
         .onAppear { self.updateText(from: self.thresholds()) }
-        .onChange(of: self.thresholds()) { _, value in
+        .onChangeCompat(of: self.thresholds()) { _, value in
             self.updateText(from: value)
         }
     }
