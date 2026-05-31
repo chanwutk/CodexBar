@@ -38,7 +38,12 @@ def run_command(command: list[str], timeout: int | None = None) -> int:
 
 
 def swift_test_list() -> list[str]:
-    result = subprocess.run(["swift", "test", "list"], check=True, capture_output=True, text=True)
+    result = subprocess.run(["swift", "test", "list"], capture_output=True, text=True)
+    if result.returncode != 0:
+        # Surface the underlying build/compile error instead of swallowing it.
+        print(result.stdout, flush=True)
+        print(result.stderr, file=sys.stderr, flush=True)
+        raise SystemExit(f"'swift test list' failed with exit code {result.returncode}")
     suites: set[str] = set()
     for line in result.stdout.splitlines():
         if "/" not in line:
