@@ -146,7 +146,13 @@ jobs:
           tmp="$(mktemp -d)"
           mkdir -p Casks Formula
 
-          app_zip="${CASK_ARTIFACT:-CodexBar-macos-universal-{version}.zip}"
+          # NOTE: do not inline the default as ${CASK_ARTIFACT:-...-{version}.zip} —
+          # the `}` inside `{version}` closes the parameter expansion early and appends
+          # a stray `.zip}` to the asset name.
+          app_zip="$CASK_ARTIFACT"
+          if [[ -z "$app_zip" ]]; then
+            app_zip="CodexBar-macos-universal-{version}.zip"
+          fi
           app_zip="${app_zip//\{version\}/$version}"
 
           assets=(
@@ -157,8 +163,23 @@ jobs:
             "CodexBarCLI-v${version}-linux-x86_64.tar.gz"
           )
 
+          # Download from the public release URL with curl instead of cross-repo
+          # `gh release download`: this repo's GITHUB_TOKEN cannot reliably enumerate
+          # another repo's release assets ("no assets match the file pattern"). Retry to
+          # absorb the few-second lag before freshly uploaded assets become available.
+          base_url="https://github.com/${SOURCE_REPO}/releases/download/${TAG}"
           for asset in "${assets[@]}"; do
-            gh release download "$TAG" --repo "$SOURCE_REPO" --pattern "$asset" --dir "$tmp"
+            for attempt in {1..10}; do
+              if curl -fSL --retry 3 -o "$tmp/$asset" "${base_url}/${asset}"; then
+                break
+              fi
+              if [[ "$attempt" -eq 10 ]]; then
+                echo "Asset '$asset' never became available after ${attempt} attempts." >&2
+                exit 1
+              fi
+              echo "Asset '$asset' not available yet (attempt ${attempt}); retrying in 15s..." >&2
+              sleep 15
+            done
           done
 
           sha() {
