@@ -43,6 +43,22 @@ def swift_test_list() -> list[str]:
         # Surface the underlying build/compile error instead of swallowing it.
         print(result.stdout, flush=True)
         print(result.stderr, file=sys.stderr, flush=True)
+        # `swift test list` only reports "error: fatalError" when the test binary crashes
+        # during discovery. Run the test bundle directly with backtraces to reveal the cause.
+        try:
+            subprocess.run(["swift", "build", "--build-tests"], check=False)
+            bundles = subprocess.run(
+                ["find", ".build", "-type", "f", "-path", "*.xctest/Contents/MacOS/*"],
+                capture_output=True, text=True, check=False)
+            for binary in bundles.stdout.split():
+                print(f"::group::Direct run of {binary}", flush=True)
+                subprocess.run(
+                    [binary, "--list-tests"],
+                    env={**os.environ, "SWIFT_BACKTRACE": "enable=yes,demangle=yes"},
+                    check=False)
+                print("::endgroup::", flush=True)
+        except Exception as exc:  # noqa: BLE001 - diagnostics only
+            print(f"Direct test-binary diagnostic failed: {exc}", file=sys.stderr, flush=True)
         raise SystemExit(f"'swift test list' failed with exit code {result.returncode}")
     suites: set[str] = set()
     for line in result.stdout.splitlines():
